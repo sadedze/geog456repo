@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map Marker</title>
+</head>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+crossorigin=""></script>
+<style>
+    #map { height: 500px;  }
+</style>
+<body>
+    <div id="map"></div>
+    <!-- Script tag with an address to the source of a js script -->
+    <script src="./data/waypoints.js"></script>
+    <script>
+        var carolinaHall = [35.911276,-79.05004]
+        var map = L.map('map').setView(carolinaHall, 17);
+        var OSM = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                    }).addTo(map);
+        
+        var marker = L.marker([35.911276,-79.05004]).bindPopup("<b>Carolina Hall</b>").addTo(map)
+        var Esri_WorldTopoMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+	    attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community'
+        }).addTo(map);
+        //L.geoJSON(waypoints).addTo(map);
+
+        var geojsonMarkerOptions = {
+        radius: 8,
+        fillColor: "#56a0d3",
+        color: "#000",
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.8
+    };
+
+    var myWaypoints = L.geoJSON(waypoints, {
+    pointToLayer: function (feature, latlng) {
+        return L.circleMarker(latlng, geojsonMarkerOptions);
+    }
+    }).addTo(map);
+        var lon = waypoints.features[0].geometry.coordinates[0];
+        var lat = waypoints.features[0].geometry.coordinates[1];
+        var coord = [lat,lon];
+        L.marker(coord).addTo(map)
+
+        var baseMaps = {
+        "OpenStreetMap": OSM,
+        "ESRI World Topo Map": Esri_WorldTopoMap
+    };
+
+var overlayMaps = {
+    "Jwalk": myWaypoints
+};
+var layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
+    </script>
+    <!-- <script src="./data/javascriptLines.js"></script> -->
+</body>
+</html>

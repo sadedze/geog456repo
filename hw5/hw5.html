@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Homework 5</title>
+</head>
+<body>
+    <script src = "./data/NC_Pharmacies.js">
+       // Assuming pharmpoints is my variable created from my geojson dataset.
+    var scores = pharmpoints.features.map(e => e.properties.Score)
+    </script>
+
+<button type="button" onclick="console.log(scores)">Click Me!</button>
+     
+</body>
+</html>

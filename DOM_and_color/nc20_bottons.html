@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""/>
+
+ <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+ integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+ crossorigin=""></script>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.1/chroma.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/simple-statistics/7.0.0/simple-statistics.min.js"></script>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+
+</head>
+<style>
+    #map { height: 350px; }
+
+     .bar {
+      fill: steelblue;
+    }
+
+    .bar-label{
+        fill: white;
+    }
+
+    .bar:hover {
+      fill: orange;
+    }
+
+    .axis text {
+    fill: white;
+    font: 10px sans-serif;
+  }
+    .axis path,
+    .axis line {
+      fill: none;
+      stroke: #fff;
+      shape-rendering: crispEdges;
+    }
+    .bcontainer
+    {
+        display: flex;
+            align-items: center;
+    }
+    .slider-container {
+    margin-right: 20px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.slider {
+    width: 150px; 
+}
+
+.tick-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 5px;
+}
+
+.tick {
+    font-size: 12px; 
+    color: #888; 
+}
+</style>
+<script src="./data/NC20counties_pop_4326.js"></script>
+<body>
+    <div class="bcontainer">
+            <div class="slider-container">
+                <p>Number of classes: <span id="selected-value">2</span></p>            
+                    <input type="range" min="2" max="7" value="2" class="slider" id="slider" oninput='makeFigures()'>
+                    <div class="tick-container">
+                        <span class="tick">2</span>
+                        <span class="tick">3</span>
+                        <span class="tick">4</span>
+                        <span class="tick">5</span>
+                        <span class="tick">6</span>
+                        <span class="tick">7</span>
+                    </div>
+                
+            </div>
+    
+            <div>
+                <input type="radio" id="equal" name="method" value="equal" checked>
+                <label for="equal">Equal</label><br>
+                <input type="radio" id="quantiles" name="method" value="quantiles" >
+                <label for="quantiles">Quantiles</label><br>
+                <input type="radio" id="natural-breaks" name="method" value="natural-breaks" >
+                <label for="natural-breaks">Natural Breaks</label>
+            </div>
+        </div>
+    
+
+
+    <div id="map"></div>
+    <svg id="bar-graph" width="800" height="400" style=" background-color: rgb(58, 55, 55); color: white;"></svg>
+
+    <script>
+        //setting the initial values
+        document.getElementById('slider').value = 5;
+        document.getElementById('selected-value').textContent = 5; 
+        document.getElementById('equal').checked = true; 
+
+        var classifierType = 'equal'
+        var numberOfClasses = 5
+
+        nc.features.sort(function(a, b) {
+                return a.properties.Total - b.properties.Total;
+            });
+        var data = nc.features.map(e =>e.properties.Total) 
+        var names = nc.features.map(e =>e.properties.NAME) 
+        
+       
+        var map = L.map('map', {attributionControl: false }).setView([35.94243575255426, -78.55224609375001 ], 8);        
+        
+            
+        function style(feature) {
+            return {
+                    fillColor: colorScale(feature.properties.Total),
+                    weight: 2,
+                    opacity: 1,
+                    color: 'gray',
+                    // dashArray: '3',
+                    fillOpacity: 0.7
+                };
+            }
+            var colorArray = ['#ffffd4','#fee391','#fec44f','#fe9929','#ec7014','#cc4c02','#8c2d04']
+
+            var colorScale = chroma.scale(colorArray).classes(chroma.limits(data, 'e', 4)); // e is for equal, q for quantile, 
+            
+            function colorSchema() {
+        
+            if (classifierType == 'equal') {colorScale = chroma.scale(colorArray).classes(chroma.limits(data, 'e', numberOfClasses)) }
+            if (classifierType == 'quantiles') {colorScale = chroma.scale(colorArray).classes(chroma.limits(data, 'q', numberOfClasses)) }
+            if (classifierType == 'natural-breaks') { 
+            
+            var breaks = ss.ckmeans(data, numberOfClasses); 
+            var br = [];  
+                for (var i = 0; i < breaks.length; i++){br.push(breaks[i][0]); if (i == breaks.length-1){br.push(breaks[i][breaks[i].length-1])} } 
+                colorScale = chroma.scale(colorArray).classes(br); 
+                };
+                console.log(classifierType)
+            };
+
+var myGeoJson = L.geoJson(nc, {style: style});
+
+var OpenStreetMap_Mapnik = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        opacity: .5,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+
+
+//D3 section with the help of chatGPT
+const width = 800;
+const height = 400;
+const margin = { top: 20, right: 20, bottom: 100, left: 40 };
+
+
+// Create SVG element
+const svg = d3.select("#bar-graph")
+              .attr("width", width)
+              .attr("height", height);
+
+// Create scales
+const xScale = d3.scaleBand()
+                 .domain(d3.range(data.length))
+                 .range([margin.left, width - margin.right])
+                 .padding(0.1);
+
+const yScale = d3.scaleLinear()
+                 .domain([0, d3.max(data)])
+                 .nice()
+                 .range([height - margin.bottom, margin.top]);
+
+// Create bars
+var values = [200000, 400000, 600000, 800000, 1000000];   
+        values.forEach(function(value) {
+        svg.append("line")
+    .attr("x1", margin.left)  // starting x-coordinate
+    .attr("y1", yScale(value)) // starting y-coordinate (corresponding to 200k)
+    .attr("x2", width)  // ending x-coordinate
+    .attr("y2", yScale(value)) // ending y-coordinate (corresponding to 200k)
+    .attr("stroke", "darkgray")  // line color
+    .attr("stroke-width", 1); // line widt
+        })
+function makeD3() {
+    svg.selectAll("rect").remove()
+    
+svg.selectAll("rect")
+   .data(data)
+   .enter()
+   .append("rect")
+   .attr("x", (d, i) => xScale(i))
+   .attr("y", height - margin.bottom) // Start from the bottom
+   .attr("width", xScale.bandwidth())
+   .attr("height", 0) // Start with zero height
+   .attr("fill", (d,i)=> colorScale(d)) // Ensure fill color is set correctly
+//    .transition()
+//    .duration(1000) // Set the duration of the transition
+   .attr("y", d => yScale(d)) // Transition to final y position
+   .attr("height", d => height - margin.bottom - yScale(d)); // Transition to final height
+        }
+
+svg.append("g")
+   .attr("class", "axis")
+   .attr("transform", `translate(${margin.left}, 0)`)
+   .call(d3.axisLeft(yScale).tickFormat(d3.format(".2s")));
+
+const labelDistance = 5
+svg.selectAll(".bar-label")
+    .data(names)
+    .enter()
+    .append("text")
+    .attr("class", "bar-label")
+    .attr("x", (d, i) => xScale(i) + xScale.bandwidth() / 2 + labelDistance)
+    .attr("y", height - margin.bottom + 10 ) // Adjust this value to control the vertical position
+    .attr("text-anchor", "end")
+    .attr("dominant-baseline", "middle")
+    .attr("transform", (d, i) => `rotate(-90 ${xScale(i) + xScale.bandwidth() / 2},${height - margin.bottom + 10})`)
+    .text(d => d);
+
+// buttons and slider methods from chatGPT
+        // Slider
+        const slider = document.getElementById('slider');
+        const selectedValue = document.getElementById('selected-value');
+
+        slider.addEventListener('input', function() {
+            selectedValue.textContent = this.value;
+        });
+
+        // Radio Buttons
+        const radioButtons = document.querySelectorAll('input[name="method"]');
+        let selectedMethod = '';
+
+        radioButtons.forEach(function(radio) {
+            radio.addEventListener('change', function() {
+                selectedMethod = this.value;
+                classifierType = selectedMethod;
+                makeFigures()
+            });
+        });
+
+// functions to update map and graphs
+
+function getSliderValue() {
+    var slider = document.getElementById('slider');
+    numberOfClasses = slider.value;}
+
+function makeFigures(){
+    getSliderValue()
+    colorSchema() 
+    makeD3()
+    if (typeof myGeoJson !== 'undefined' && myGeoJson !== null) { myGeoJson.remove()} 
+    myGeoJson = L.geoJson(nc, {style: style}).addTo(map)
+}
+
+makeFigures()
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Column Divs</title>
+    <style>
+        /* this has the css for the container div */
+        #container {
+            width: 400px;
+            height: 100px;
+            border: 1px solid black;
+            display: flex;
+            align-items: flex-end;
+        }
+        /* this has the css for the columns */
+        .column {
+            width: 10%;
+            display: flex;
+            align-items: center; 
+            justify-content: center; 
+            background-color: gray;
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+
+    <script>
+        // an array of objects
+        var objectsArray = [
+            { value: 10, color: "red", class: "a" },
+            { value: 20, color: "blue", class: "b" },
+            { value: 30, color: "#FFDB58", class: "a" },
+            { value: 40, color: "#33CC33", class: "b" },
+            { value: 50, color: "#FF4500", class: "a" },
+            { value: 60, color: "#FFFF00", class: "b" },
+            { value: 70, color: "#FF6347", class: "a" },
+            { value: 80, color: "#800080", class: "b" },
+            { value: 90, color: "#FFD700", class: "a" },
+            { value: 100, color: "#4B0082", class: "b" }
+        ];
+
+        
+        // these lines get the element whose id is container from the documents, and declares it as a variable named container 
+
+        var container = document.getElementById("container");
+
+
+        // here I am creating a function that I named addColum
+
+        // function addColumn(){
+        //     var columnDiv = document.createElement("div"); // create a div element
+        //     columnDiv.className = "column"; // assign a class to the div element
+        //     columnDiv.style.height = '100px' // '100%' // assign a height to the element
+        //     container.append(columnDiv); // append the div to the container 
+        // }
+
+        // objectsArray.forEach(e => addColumn())   // iterate through the array and create a column for each element in the array
+
+           
+       // in this version of the function, I have added a parameter to the function 
+       // I named the parameter value
+       // The value is assigned to the height and to the inner text of the column. 
+
+        // function addColumn(value){
+        //     var columnDiv = document.createElement("div");
+        //     columnDiv.className = "column";
+        //     columnDiv.style.height = value + 'px' // '100%' // here I am concatenating the value + px to create a text such as '20px'
+        //     columnDiv.innerText = value
+        //     container.append(columnDiv);
+        // }
+
+        // here I am using the forEach method to iterate through the array. For each element I assign the value property to the value parameter in the function addColumn 
+        // objectsArray.forEach(e => addColumn(e.value))
+
+
+
+    // in this version of the function, I have added a an additional parameter to the function 
+       // I named one parameter value and the other color. 
+       // The color is assigned to the div background color.  
+       // The value is assigned to the height and to the inner text of the column. 
+    
+
+        // function addColumn(value,color){
+        //     var columnDiv = document.createElement("div");
+        //     columnDiv.className = "column";
+        //     columnDiv.style.backgroundColor = color;
+        //     columnDiv.style.height = value + 'px' //`${value}px`;
+        //     columnDiv.innerText = value
+        //     container.append(columnDiv);
+        // }
+    
+        // objectsArray.forEach(e => addColumn(e.value, e.color));
+
+        // this is a function to demonstrate how to create a simple boolean expression
+
+    //     function selectColor(category){
+    //         if (category == 'a') {return 'pink'}   // if the parameter category is equal to 'a' then the function stops and returns the value 'pink'
+    //         if (category == 'b') {return 'yellow'} // if the parameter category is equal to 'b' then the function stops and returns the value 'yellow'
+    //     }
+
+
+    // // In this case I am calling the function selectColor to assign the color, so I also changed the name of the paramter from color to category just to make it clearer. 
+
+
+    //     function addColumn(value,category){
+    //         var columnDiv = document.createElement("div");
+    //         columnDiv.className = "column";
+    //         columnDiv.style.backgroundColor = selectColor(category); // here I am applying the function selectColor and assigning the category as the parameter
+    //         columnDiv.style.height = value + 'px'  // this another way of concatenating // `${value}px`;
+    //         columnDiv.innerText = value
+    //         container.append(columnDiv);
+    //     }
+    
+    //     objectsArray.forEach(e => addColumn(e.value, e.class));
+
+
+        // Another example using values instead of categories
+
+        function selectColorByValue(value){
+            if (value < 50) {return 'pink'}
+            if (value >=50) {return 'yellow'}
+        }
+
+
+        function addColumn(value){
+            var columnDiv = document.createElement("div");
+            columnDiv.className = "column";
+            columnDiv.style.backgroundColor = selectColorByValue(value);
+            columnDiv.style.height = value + 'px' //`${value}px`;
+            columnDiv.innerText = value
+            container.append(columnDiv);
+        }
+    
+        objectsArray.forEach(e => addColumn(e.value, e.class));
+    </script>
+</body>
+</html>

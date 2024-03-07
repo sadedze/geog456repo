@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Column Divs</title>
+    <style>
+        #container {
+            width: 400px;
+            height: 100px;
+            border: 1px solid black;
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .column {
+            width: 10%;
+            display: flex;
+            align-items: center; 
+            justify-content: center; 
+            background-color: gray;
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.1/chroma.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/simple-statistics/7.0.0/simple-statistics.min.js"></script>
+
+
+<body>
+    <div id="container"></div>
+
+    <script>
+        var objectsArray = [
+            { value: 10, color: "red", class: "a" },
+            { value: 20, color: "blue", class: "b" },
+            { value: 25, color: "#FFDB58", class: "a" },
+            { value: 60, color: "#33CC33", class: "b" },
+            { value: 61, color: "#FF4500", class: "a" },
+            { value: 62, color: "#FFFF00", class: "b" },
+            { value: 63, color: "#FF6347", class: "a" },
+            { value: 64, color: "#800080", class: "b" },
+            { value: 99, color: "#FFD700", class: "a" },
+            { value: 100, color: "#4B0082", class: "b" }
+        ];
+
+        // to make my life easier, I transformed the data into an array of values
+        var data = objectsArray.map(e => e.value)
+
+        // These are examples of color scales that can be generated with chroma
+        // var colorScale = chroma.scale(['blue','red']).colors(3); //   this chroma method just creates an array with three colors in a gradient from blue to red
+
+        var colorScale = chroma.scale(['blue','red']).domain([10, 100]); // this chroma method creates a function that returns a value within a gradient from blue to red when given a value between 10 to 100
+        
+        // var colorScale = chroma.scale(['blue','red']).domain([10, 100]).classes(chroma.limits(data, 'e', 4)); // e is for equal, q for quantile, // this chroma method creates a function returning a value in a gradient from blue to red, and creates 4 classes based on equal interval. 
+
+        
+        // var breaks = ss.ckmeans(data, 3); // this uses simple statistics to make Natural Breaks. For some reason the chroma version does not work
+        // var br = [];  
+        //     for (var i = 0; i < breaks.length; i++){br.push(breaks[i][0]); if (i == breaks.length-1){br.push(breaks[i][breaks[i].length-1])} } // this is a hack I wrote to transform the data from the statistical software to the appropriate format
+        // var colorScale = chroma.scale(['blue','red']).classes(br); // e is for equal, q for quantile, 
+
+        
+        // the color is being assigned using the chroma method that we have created named colorScale
+
+        function addColumn(value){
+            var columnDiv = document.createElement("div");
+            columnDiv.className = "column";
+            columnDiv.style.backgroundColor = colorScale(value); // here we are applying our chroma method
+            columnDiv.style.height = value + 'px' 
+            columnDiv.innerText = value
+            container.append(columnDiv);
+        }
+    
+        objectsArray.forEach(e => addColumn(e.value, e.color));
+
+
+    </script>
+</body>
+</html>

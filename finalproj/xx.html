@@ -12,7 +12,7 @@
    integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
    crossorigin=""></script>
 
-   <script src="close.js"></script>
+   <script src="closures.js"></script>
 </head>
 <style>
     #map { 
@@ -34,6 +34,7 @@ var map = L.map('map').setView([35, -76], 7);
             maxZoom: 19,
             attribution: '© OpenStreetMap'
         }).addTo(map);
+
 
         var geojsonData = {
   "type": "FeatureCollection",
@@ -98,35 +99,17 @@ var geojsonLayer = L.geoJson(geojsonData, {
 var marker;
 
 // Slider function
-function moveSlider(value) {
-  var slider = document.getElementById('dateSlider');
 
-  // Check if the selected time is within the range of dataPoint.t and dataPoint.te
-  geojsonData.features.forEach(function(dataPoint) {
-    var t = dataPoint.properties.t;
-    var te = dataPoint.properties.te;
+  // Assuming dataPoint is the current data point being processed
+  function moveSlider(value) {
+    var slider = document.getElementById('dateSlider');
+    var startTime = new Date(dataPoint.st).getTime();
+    var endTime = new Date(dataPoint.fn).getTime();
+    var totalDuration = endTime - startTime;
+    var selectedTime = startTime + (totalDuration * (value - 7) / 11); // Adjusting value range from [7, 18] to [0, 1]
+    slider.value = (selectedTime - startTime) / totalDuration * 11 + 7; // Adjusting value range back to [7, 18]
+  }
 
-    if (value >= t && value <= te) {
-      // Point is within the time range, create or update the marker
-      var lat = dataPoint.geometry.coordinates[1];
-      var lng = dataPoint.geometry.coordinates[0];
-      if (!marker) {
-        marker = L.marker([lat, lng], { icon: customIcon }).addTo(map);
-      } else {
-        marker.setLatLng([lat, lng]);
-      }
-    } else {
-      // Point is outside the time range, remove the marker if it exists
-      if (marker) {
-        map.removeLayer(marker);
-        marker = null;
-      }
-    }
-  });
-
-  // Update the slider's value to match the selected time
-  slider.value = value;
-}
     </script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 library(jsonlite)
-df <- read.csv("finalproj/data/aggregated_closures_06052023.csv")
+df <- read.csv("C:/Users/Senam Adedze/OneDrive - University of North Carolina at Chapel Hill/SP2024/GEOG456/aggregated_closures_06052023.csv")
 
 ## make text into time
 df$st <- as.POSIXct(df$start, format = "%Y-%m-%dT%H:%M:%SZ")

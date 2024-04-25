@@ -80,43 +80,53 @@ closures.forEach(function(dataPoint) {
   geojsonData.features.push(feature);
 });
 
-//slider function 
-
 // Define a custom icon
 var customIcon = L.icon({
-  iconUrl: 'closedpic.png',
+  iconUrl: 'closedpic.jpg',
   iconSize: [30, 30],
   iconAnchor: [15, 30]
 });
 
-// Assuming dataPoint is the current data point being processed
+// Create a GeoJSON layer and add it to the map
+var geojsonLayer = L.geoJson(geojsonData, {
+  pointToLayer: function (feature, latlng) {
+    return L.marker(latlng, { icon: customIcon });
+  }
+}).addTo(map);
+
+// Marker variable for tracking the currently displayed marker
+var marker;
+
+// Slider function
 function moveSlider(value) {
   var slider = document.getElementById('dateSlider');
-  var t = dataPoint.t;
-  var te = dataPoint.te;
 
-  // Check if the selectedTime is within the range of dataPoint.t and dataPoint.te
-  if (value >= t && value <= te) {
-    // Point is within the time range, create or update the marker
-    var lat = dataPoint.Latitude;
-    var lng = dataPoint.Longitude;
-    if (!marker) {
-      marker = L.marker([lat, lng], { icon: customIcon }).addTo(map);
+  // Check if the selected time is within the range of dataPoint.t and dataPoint.te
+  geojsonData.features.forEach(function(dataPoint) {
+    var t = dataPoint.properties.t;
+    var te = dataPoint.properties.te;
+
+    if (value >= t && value <= te) {
+      // Point is within the time range, create or update the marker
+      var lat = dataPoint.geometry.coordinates[1];
+      var lng = dataPoint.geometry.coordinates[0];
+      if (!marker) {
+        marker = L.marker([lat, lng], { icon: customIcon }).addTo(map);
+      } else {
+        marker.setLatLng([lat, lng]);
+      }
     } else {
-      marker.setLatLng([lat, lng]);
+      // Point is outside the time range, remove the marker if it exists
+      if (marker) {
+        map.removeLayer(marker);
+        marker = null;
+      }
     }
-  } else {
-    // Point is outside the time range, remove the marker if it exists
-    if (marker) {
-      map.removeLayer(marker);
-      marker = null;
-    }
-  }
+  });
 
   // Update the slider's value to match the selected time
   slider.value = value;
 }
-
-
     </script>
 </body>
+</html>

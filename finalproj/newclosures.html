@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css"
+   integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ=="
+   crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"
+   integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
+   crossorigin=""></script>
+
+   <script src="close.js"></script>
+</head>
+<style>
+    #map { 
+        width: 100%;
+        height: 500px;
+         }
+</style>
+<body>
+    <h3 id="daYear">Day</h3>
+    <input id="dateSlider" type="range" name="Day" min="7" max="18" oninput="moveSlider(this.value)">
+    <div id="map"></div>
+    
+    <script>
+      // Assuming dataPoint is the current data point being processed
+      function moveSlider(value) {
+        var slider = document.getElementById('dateSlider');
+        var startTime = new Date(dataPoint.t).getTime();
+        var endTime = new Date(dataPoint.te).getTime();
+        var totalDuration = endTime - startTime;
+        var selectedTime = startTime + (totalDuration * (value - 7) / 11); // Adjusting value range from [7, 18] to [0, 1]
+        slider.value = (selectedTime - startTime) / totalDuration * 11 + 7; // Adjusting value range back to [7, 18]
+      }
+    </script>
+    
+    <script>
+
+var map = L.map('map').setView([35, -76], 7);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        var geojsonData = {
+  "type": "FeatureCollection",
+  "features": []
+};
+
+closures.forEach(function(dataPoint) {
+  var feature = {
+    "type": "Feature",
+    "properties": {
+      "IncidentID": dataPoint.IncidentID,
+      "start": dataPoint.start,
+      "end": dataPoint.end,
+      "RoadName": dataPoint.RoadName,
+      "CommonName": dataPoint.CommonName,
+      "Direction": dataPoint.Direction,
+      "ConditionName": dataPoint.ConditionName,
+      "IncidentType": dataPoint.IncidentType,
+      "Event": dataPoint.Event,
+      "EventName": dataPoint.EventName,
+      "Reason": dataPoint.Reason,
+      "DOTNotes": dataPoint.DOTNotes,
+      "day": dataPoint.day,
+      "flood": dataPoint.flood,
+      "wind": dataPoint.wind,
+      "winter": dataPoint.winter,
+      "fog": dataPoint.fog,
+      "rainevent": dataPoint.rainevent,
+      "winterevent": dataPoint.winterevent,
+      "cycloneevent": dataPoint.cycloneevent,
+      "dur": dataPoint.dur,
+      "noweather": dataPoint.noweather,
+      "st": dataPoint.st,
+      "fn": dataPoint.fn,
+      "t": dataPoint.t,
+      "te": dataPoint.te
+    },
+    "geometry": {
+      "type": "Point",
+      "coordinates": [dataPoint.Longitude, dataPoint.Latitude]
+    }
+  };
+  geojsonData.features.push(feature);
+});
+
+
+    </script>
+</body>

@@ -11,6 +11,13 @@
     <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"
    integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
    crossorigin=""></script>
+   <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+   <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+   <!-- Include this library for mobile touch support  -->
+   <script src="http://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.2/jquery.ui.touch-punch.min.js"></script>
+
+
+   <script src="SliderControl.js"></script>
 
    <script src="closures.js"></script>
 </head>
@@ -28,6 +35,9 @@
 
     
     <script>
+
+var sliderControl = null
+
 //create basemap
 var map = L.map('map').setView([35, -76], 7);
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -84,8 +94,8 @@ closures.forEach(function(dataPoint) {
 // Define a custom icon
 var customIcon = L.icon({
   iconUrl: 'closedpic.jpg',
-  iconSize: [30, 30],
-  iconAnchor: [15, 30]
+  iconSize: [10, 10],
+  iconAnchor: [10, 10]
 });
 
 // Create a GeoJSON layer and add it to the map
@@ -95,20 +105,22 @@ var geojsonLayer = L.geoJson(geojsonData, {
   }
 }).addTo(map);
 
-// Marker variable for tracking the currently displayed marker
-var marker;
+ //Fetch some data from a GeoJSON file
+ $.getJSON("data.json", function(geojsonData) {
+        var testlayer = L.geoJson(geojsonData),
+            sliderControl = L.control.sliderControl({
+                position: "topright",
+                layer: testlayer
+            });})
 
-// Slider function
+        //For a Range-Slider use the range property:
+        sliderControl = L.control.sliderControl({
+            position: "topright",
+            layer: testlayer,
+            range: true
+        });
 
-  // Assuming dataPoint is the current data point being processed
-  function moveSlider(value) {
-    var slider = document.getElementById('dateSlider');
-    var startTime = new Date(dataPoint.st).getTime();
-    var endTime = new Date(dataPoint.fn).getTime();
-    var totalDuration = endTime - startTime;
-    var selectedTime = startTime + (totalDuration * (value - 7) / 11); // Adjusting value range from [7, 18] to [0, 1]
-    slider.value = (selectedTime - startTime) / totalDuration * 11 + 7; // Adjusting value range back to [7, 18]
-  }
+
 
     </script>
 </body>

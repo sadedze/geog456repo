@@ -23,7 +23,7 @@
 
 <body>
     <h3 id="daYear">Day</h3>
-    <input id="dateSlider" type="range" name="Day" min="7" max="18" oninput="moveSlider(this.value)">
+    <input id="dateSlider" type="range" name="Day" min="0" max="17" oninput="moveSlider(this.value)">
     <div id="map"></div>
 
     
@@ -34,6 +34,7 @@ var map = L.map('map').setView([35, -76], 7);
             maxZoom: 19,
             attribution: '© OpenStreetMap'
         }).addTo(map);
+
 
         var geojsonData = {
   "type": "FeatureCollection",
@@ -80,45 +81,32 @@ closures.forEach(function(dataPoint) {
   geojsonData.features.push(feature);
 });
 
-//slider function 
+// Define a custom icon
+var customIcon = L.icon({
+  iconUrl: 'closedpic.jpg',
+  iconSize: [30, 30],
+  iconAnchor: [15, 30]
+});
 
-var LeafIcon = L.Icon.extend({
-            options: {
-                iconSize:     [30, 30],
-                iconAnchor:   [15, 30],
-            }
-        })
+// Create a GeoJSON layer and add it to the map
+var geojsonLayer = L.geoJson(geojsonData, {
+  pointToLayer: function (feature, latlng) {
+    return L.marker(latlng, { icon: customIcon });
+  }
+}).addTo(map);
 
-        var closedIcon = new LeafIcon({iconUrl: 'closedpic.jpg'})
+// Marker variable for tracking the currently displayed marker
+var marker;
 
-// Assuming dataPoint is the current data point being processed
+// Slider function
 function moveSlider(value) {
   var slider = document.getElementById('dateSlider');
-  var t = dataPoint.t;
-  var te = dataPoint.te;
-
-  // Check if the selectedTime is within the range of dataPoint.t and dataPoint.te
-  if (value >= t && value <= te) {
-    // Point is within the time range, create or update the marker
-    var lat = dataPoint.Latitude;
-    var lng = dataPoint.Longitude;
-    if (!marker) {
-      marker = L.marker([lat, lng], { icon: customIcon }).addTo(map);
-    } else {
-      marker.setLatLng([lat, lng]);
-    }
-  } else {
-    // Point is outside the time range, remove the marker if it exists
-    if (marker) {
-      map.removeLayer(marker);
-      marker = null;
-    }
-  }
-
-  // Update the slider's value to match the selected time
-  slider.value = value;
+  var startDate = new Date('2018-09-12').getTime();
+  var endDate = new Date('2018-09-29').getTime();
+  var totalDuration = endDate - startDate;
+  var selectedTime = startDate + (totalDuration * value / 17); // Adjusting value range from [0, 17] to [startDate, endDate]
+  slider.value = (selectedTime - startDate)
 }
 
-
-    </script>
+</script>
 </body>

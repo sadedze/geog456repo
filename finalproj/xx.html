@@ -11,13 +11,7 @@
     <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"
    integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
    crossorigin=""></script>
-   <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
-   <script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
-   <!-- Include this library for mobile touch support  -->
-   <script src="http://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.2/jquery.ui.touch-punch.min.js"></script>
-
-
-   <script src="SliderControl.js"></script>
+   
 
    <script src="closures.js"></script>
 </head>
@@ -26,11 +20,43 @@
         width: 100%;
         height: 500px;
          }
+    
+    /* Custom slider style */
+    #dateSlider {
+        -webkit-appearance: none;
+        width: 100%;
+        height: 15px;
+        border-radius: 5px;  
+        background: #d3d3d3;
+        outline: none;
+        opacity: 0.7;
+        -webkit-transition: .2s;
+        transition: opacity .2s;
+    }
+
+    #dateSlider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 25px;
+        height: 25px;
+        border-radius: 50%; 
+        background: #04AA6D;
+        cursor: pointer;
+    }
+
+    #dateSlider::-moz-range-thumb {
+        width: 25px;
+        height: 25px;
+        border-radius: 50%;
+        background: #04AA6D;
+        cursor: pointer;
+    }
 </style>
 
 <body>
     <h3 id="daYear">Day</h3>
-    <input id="dateSlider" type="range" name="Day" min="7" max="18" oninput="moveSlider(this.value)">
+    <input id="dateSlider" type="range" name="Day" min="0" max="17" oninput="moveSlider(this.value)">
+    <div id="dateDisplay"></div>
     <div id="map"></div>
 
     
@@ -105,22 +131,42 @@ var geojsonLayer = L.geoJson(geojsonData, {
   }
 }).addTo(map);
 
- //Fetch some data from a GeoJSON file
- $.getJSON("data.json", function(geojsonData) {
-        var testlayer = L.geoJson(geojsonData),
-            sliderControl = L.control.sliderControl({
-                position: "topright",
-                layer: testlayer
-            });})
+function moveSlider(value) {
+    console.log(value)
+    // Remove existing markers
+    map.eachLayer(function (layer) {
+        if (layer instanceof L.Marker) {
+            map.removeLayer(layer);
+        }
+    });
 
-        //For a Range-Slider use the range property:
-        sliderControl = L.control.sliderControl({
-            position: "topright",
-            layer: testlayer,
-            range: true
-        });
+    // Define the start and end dates
+    var startDate = new Date("2018-09-12T00:00:00Z");
+    var endDate = new Date("2018-09-29T23:59:59Z");
 
+    // Calculate the total duration in milliseconds
+    var totalDuration = endDate.getTime() - startDate.getTime();
 
+    // Calculate the selected time based on the slider value
+    var selectedTime = new Date(startDate.getTime() + (totalDuration * value / 17));
+
+    updateDateDisplay(selectedTime);
+
+    // Iterate through each data point and add a marker if it falls within the selected range
+    geojsonData.features.forEach(function (feature) {
+        var startTime = new Date(feature.properties.st).getTime();
+        var endTime = new Date(feature.properties.fn).getTime();
+        if (selectedTime >= startTime && selectedTime <= endTime) {
+            var marker = L.marker([feature.geometry.coordinates[1], feature.geometry.coordinates[0]], { icon: customIcon });
+            marker.addTo(map);
+        }
+    });
+}
+
+function updateDateDisplay(date) {
+    var dateDisplay = document.getElementById('dateDisplay');
+    dateDisplay.textContent = date.toDateString(); // Display the date in a human-readable format
+}
 
     </script>
 </body>

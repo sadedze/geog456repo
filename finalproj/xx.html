@@ -10,10 +10,12 @@
    crossorigin=""/>
    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css">
+   <link rel="stylesheet" href="https://unpkg.com/leaflet.heat/dist/leaflet.heat.css" />
     <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"
    integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
    crossorigin=""></script>
    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+   <script src="leaflet.heat.js"></script>
    <script src="closures.js"></script>
 </head>
 <style>
@@ -21,49 +23,58 @@
 .material-symbols-outlined {
     font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     display: inline-block;
-    color: red; /* Change color as needed */
+    color: rgb(220, 41, 41); /* Change color as needed */
     font-family: 'Material Icons'; /* Make sure this is the correct font family */
-    font-size: 24px; /* Adjust size as needed */
+    font-size: 12px; /* Adjust size as needed */
 }
 
-    
-    
-    #map { 
-        width: 100%;
-        height: 500px;
-         }
-    
-    /* Custom slider style */
-    #dateSlider {
-        -webkit-appearance: none;
-        width: 100%;
-        height: 15px;
-        border-radius: 5px;  
-        background: #d3d3d3;
-        outline: none;
-        opacity: 0.7;
-        -webkit-transition: .2s;
-        transition: opacity .2s;
-    }
+#map { 
+    width: 100%;
+    height: 500px;
+}
 
-    #dateSlider::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 25px;
-        height: 25px;
-        border-radius: 50%; 
-        background: #04AA6D;
-        cursor: pointer;
-    }
+/* Custom slider style */
+#dateSlider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 15px;
+    border-radius: 5px;  
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+}
 
-    #dateSlider::-moz-range-thumb {
-        width: 25px;
-        height: 25px;
-        border-radius: 50%;
-        background: #04AA6D;
-        cursor: pointer;
-    }
+#dateSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%; 
+    background: #04AA6D;
+    cursor: pointer;
+}
 
+#dateSlider::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: #04AA6D;
+    cursor: pointer;
+}
+
+#toggleButton {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 1000;
+    background-color: #fff;
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+}
 
 </style>
 
@@ -74,97 +85,95 @@
     <div id="map"></div>
 
     <script>
-
-
-//create basemap
-var map = L.map('map').setView([35, -76], 7);
+        // Create basemap
+        var map = L.map('map').setView([35, -76], 7);
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '© OpenStreetMap'
         }).addTo(map);
 
-// Create a geocoder control that uses the custom input field
-var geocoder = L.Control.geocoder({
-    geocoder: L.Control.Geocoder.nominatim(),
-    defaultMarkGeocode: false,
-    placeholder: "Search Location",
-    collapsed: false,
-    query: ""
-}).on('markgeocode', function (e) {
-    var latlng = e.geocode.center;
-    map.setView(latlng, map.getZoom());
-    map.fitBounds(e.geocode.bbox);
-}).addTo(map);
 
+        var geojsonData = {
+            "type": "FeatureCollection",
+            "features": []
+        };
 
-    var geojsonData = {
-  "type": "FeatureCollection",
-  "features": []
-};
+        // Create geojson w data info
+        closures.forEach(function (dataPoint) {
+            var feature = {
+                "type": "Feature",
+                "properties": {
+                    "IncidentID": dataPoint.IncidentID,
+                    "start": dataPoint.start,
+                    "end": dataPoint.end,
+                    "RoadName": dataPoint.RoadName,
+                    "CommonName": dataPoint.CommonName,
+                    "Direction": dataPoint.Direction,
+                    "ConditionName": dataPoint.ConditionName,
+                    "IncidentType": dataPoint.IncidentType,
+                    "Event": dataPoint.Event,
+                    "EventName": dataPoint.EventName,
+                    "Reason": dataPoint.Reason,
+                    "DOTNotes": dataPoint.DOTNotes,
+                    "day": dataPoint.day,
+                    "flood": dataPoint.flood,
+                    "wind": dataPoint.wind,
+                    "winter": dataPoint.winter,
+                    "fog": dataPoint.fog,
+                    "rainevent": dataPoint.rainevent,
+                    "winterevent": dataPoint.winterevent,
+                    "cycloneevent": dataPoint.cycloneevent,
+                    "dur": dataPoint.dur,
+                    "noweather": dataPoint.noweather,
+                    "st": dataPoint.st,
+                    "fn": dataPoint.fn,
+                    "t": dataPoint.t,
+                    "te": dataPoint.te
+                },
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [dataPoint.Longitude, dataPoint.Latitude]
+                }
+            };
+            geojsonData.features.push(feature);
+        });
 
-//create geojson w data info
-closures.forEach(function(dataPoint) {
-  var feature = {
-    "type": "Feature",
-    "properties": {
-      "IncidentID": dataPoint.IncidentID,
-      "start": dataPoint.start,
-      "end": dataPoint.end,
-      "RoadName": dataPoint.RoadName,
-      "CommonName": dataPoint.CommonName,
-      "Direction": dataPoint.Direction,
-      "ConditionName": dataPoint.ConditionName,
-      "IncidentType": dataPoint.IncidentType,
-      "Event": dataPoint.Event,
-      "EventName": dataPoint.EventName,
-      "Reason": dataPoint.Reason,
-      "DOTNotes": dataPoint.DOTNotes,
-      "day": dataPoint.day,
-      "flood": dataPoint.flood,
-      "wind": dataPoint.wind,
-      "winter": dataPoint.winter,
-      "fog": dataPoint.fog,
-      "rainevent": dataPoint.rainevent,
-      "winterevent": dataPoint.winterevent,
-      "cycloneevent": dataPoint.cycloneevent,
-      "dur": dataPoint.dur,
-      "noweather": dataPoint.noweather,
-      "st": dataPoint.st,
-      "fn": dataPoint.fn,
-      "t": dataPoint.t,
-      "te": dataPoint.te
-    },
-    "geometry": {
-      "type": "Point",
-      "coordinates": [dataPoint.Longitude, dataPoint.Latitude]
-    }
-  };
-  geojsonData.features.push(feature);
-});
+        var customIcon = L.divIcon({
+            className: 'material-symbols-outlined',
+            iconAnchor: [5, 5], // Adjust icon anchor if needed
+            html: '&#x2716;' // Unicode for a "x" symbol
+        });
 
-// Define a custom icon
-var customIcon = L.divIcon({
-    className: 'material-symbols-outlined',
-    iconAnchor: [5, 5], // Adjust icon anchor if needed
-    html: '&#x2716;' // Unicode for a "x" symbol
-});
-
-// Create a GeoJSON layer and add it to the map
+        // Create a GeoJSON layer and add it to the map
 var geojsonLayer = L.geoJson(geojsonData, {
   pointToLayer: function (feature, latlng) {
-    return L.marker(latlng, { icon: customIcon });
+    // Create a marker with custom icon
+    var marker = L.marker(latlng, { icon: customIcon });
+// Create popup content
+var popupContent = "<b>Road Name:</b> " + features.properties.RoadName + "<br>" +
+                        "<b>Direction:</b> " + features.properties.Direction + "<br>" +
+                        "<b>Start Time:</b> " + new Date(features.properties.st).toDateString() + "<br>" +
+                        "<b>End Time:</b> " + new Date(features.properties.fn).toDateString() + "<br>" +
+                        "<b>Reason:</b> " + features.properties.Reason;
+
+    // Bind popup to marker
+    marker.bindPopup(popupContent);
+    // Return the marker
+    return marker;
   }
+
+  
 }).addTo(map);
 
-function moveSlider(value) {
-    console.log(value)
-    // Remove existing markers
-    map.eachLayer(function (layer) {
-        if (layer instanceof L.Marker) {
-            map.removeLayer(layer);
-        }
-    });
 
+// Ensure the map view is centered on the geojsonLayer
+map.fitBounds(geojsonLayer.getBounds());
+
+var heatLayer = L.heatLayer(geojsonData.features.map(function (feature) {
+    return [feature.geometry.coordinates[1], feature.geometry.coordinates[0]];
+})).addTo(map);
+
+function moveSlider(value) {
     // Define the start and end dates
     var startDate = new Date("2018-09-12T00:00:00Z");
     var endDate = new Date("2018-09-29T23:59:59Z");
@@ -177,14 +186,35 @@ function moveSlider(value) {
 
     updateDateDisplay(selectedTime);
 
-    // Iterate through each data point and add a marker if it falls within the selected range
-    geojsonData.features.forEach(function (feature) {
+    // Filter the data to include only points within the selected time range
+    var filteredData = geojsonData.features.filter(function (feature) {
         var startTime = new Date(feature.properties.st).getTime();
         var endTime = new Date(feature.properties.fn).getTime();
-        if (selectedTime >= startTime && selectedTime <= endTime) {
-            var marker = L.marker([feature.geometry.coordinates[1], feature.geometry.coordinates[0]], { icon: customIcon });
-            marker.addTo(map);
-        }
+        return selectedTime >= startTime && selectedTime <= endTime;
+    });
+
+    // Update the heatmap layer based on the selected time
+    var heatData = geojsonData.features.filter(function (feature) {
+        var startTime = new Date(feature.properties.st).getTime();
+        var endTime = new Date(feature.properties.fn).getTime();
+        return selectedTime >= startTime && selectedTime <= endTime;
+    }).map(function (feature) {
+        return [feature.geometry.coordinates[1], feature.geometry.coordinates[0]];
+    });
+
+    // Update the heat map layer based on the filtered data
+    var heatData = filteredData.map(function (feature) {
+        return [feature.geometry.coordinates[1], feature.geometry.coordinates[0]];
+    });
+    heatLayer.setLatLngs(heatData);
+
+    // Clear existing markers from the geojsonLayer
+    geojsonLayer.clearLayers();
+
+    // Add markers for the filtered data points to the geojsonLayer
+    filteredData.forEach(function (feature) {
+        var marker = L.marker([feature.geometry.coordinates[1], feature.geometry.coordinates[0]], { icon: customIcon });
+        geojsonLayer.addLayer(marker);
     });
 }
 
@@ -192,6 +222,34 @@ function updateDateDisplay(date) {
     var dateDisplay = document.getElementById('dateDisplay');
     dateDisplay.textContent = date.toDateString(); // Display the date in a human-readable format
 }
+
+// Define base layers
+var baseLayers = {
+    "Heatmap": heatLayer,
+    "Points": geojsonLayer
+};
+
+// Create layer control and add it to the map
+L.control.layers(null, baseLayers).addTo(map);
+
+ // Create a geocoder control
+ var geocoder = L.Control.geocoder({
+            geocoder: L.Control.Geocoder.nominatim(),
+            defaultMarkGeocode: false,
+            placeholder: "Search Location",
+            collapsed: true,
+            query: ""
+        }).on('markgeocode', function (e) {
+            var latlng = e.geocode.center;
+            map.setView(latlng, map.getZoom());
+            map.fitBounds(e.geocode.bbox);
+        }).addTo(map);
+
+// Initially add both layers to the map
+map.addLayer(heatLayer);
+map.addLayer(geojsonLayer);
+
+        moveSlider(0);
 
     </script>
 </body>

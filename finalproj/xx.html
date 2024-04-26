@@ -8,14 +8,26 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css"
    integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ=="
    crossorigin=""/>
+   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+   <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css">
     <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"
    integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
    crossorigin=""></script>
-   
-
+   <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
    <script src="closures.js"></script>
 </head>
 <style>
+
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    display: inline-block;
+    color: red; /* Change color as needed */
+    font-family: 'Material Icons'; /* Make sure this is the correct font family */
+    font-size: 24px; /* Adjust size as needed */
+}
+
+    
+    
     #map { 
         width: 100%;
         height: 500px;
@@ -61,10 +73,8 @@
     <div id="dateDisplay"></div>
     <div id="map"></div>
 
-    
     <script>
 
-var sliderControl = null
 
 //create basemap
 var map = L.map('map').setView([35, -76], 7);
@@ -73,8 +83,21 @@ var map = L.map('map').setView([35, -76], 7);
             attribution: '© OpenStreetMap'
         }).addTo(map);
 
+// Create a geocoder control that uses the custom input field
+var geocoder = L.Control.geocoder({
+    geocoder: L.Control.Geocoder.nominatim(),
+    defaultMarkGeocode: false,
+    placeholder: "Search Location",
+    collapsed: false,
+    query: ""
+}).on('markgeocode', function (e) {
+    var latlng = e.geocode.center;
+    map.setView(latlng, map.getZoom());
+    map.fitBounds(e.geocode.bbox);
+}).addTo(map);
 
-        var geojsonData = {
+
+    var geojsonData = {
   "type": "FeatureCollection",
   "features": []
 };
@@ -120,10 +143,10 @@ closures.forEach(function(dataPoint) {
 });
 
 // Define a custom icon
-var customIcon = L.icon({
-  iconUrl: 'closedpic.jpg',
-  iconSize: [10, 10],
-  iconAnchor: [10, 10]
+var customIcon = L.divIcon({
+    className: 'material-symbols-outlined',
+    iconAnchor: [5, 5], // Adjust icon anchor if needed
+    html: '&#x2716;' // Unicode for a "x" symbol
 });
 
 // Create a GeoJSON layer and add it to the map

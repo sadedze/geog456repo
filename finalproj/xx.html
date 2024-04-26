@@ -14,6 +14,7 @@
     <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"
    integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
    crossorigin=""></script>
+   <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
    <script src="leaflet.heat.js"></script>
    <script src="closures.js"></script>
@@ -64,22 +65,10 @@
     cursor: pointer;
 }
 
-#toggleButton {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    z-index: 1000;
-    background-color: #fff;
-    padding: 5px 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
 </style>
 
 <body>
-    <h3 id="daYear">Road Closures During Hurricane Florence</h3>
+    <h3 id="title">Road Closures During Hurricane Florence</h3>
     <input id="dateSlider" type="range" name="Day" min="0" max="17" oninput="moveSlider(this.value)">
     <div id="dateDisplay"></div>
     <div id="map"></div>
@@ -145,24 +134,30 @@
         });
 
         // Create a GeoJSON layer and add it to the map
+
 var geojsonLayer = L.geoJson(geojsonData, {
   pointToLayer: function (feature, latlng) {
     // Create a marker with custom icon
     var marker = L.marker(latlng, { icon: customIcon });
-// Create popup content
-var popupContent = "<b>Road Name:</b> " + features.properties.RoadName + "<br>" +
-                        "<b>Direction:</b> " + features.properties.Direction + "<br>" +
-                        "<b>Start Time:</b> " + new Date(features.properties.st).toDateString() + "<br>" +
-                        "<b>End Time:</b> " + new Date(features.properties.fn).toDateString() + "<br>" +
-                        "<b>Reason:</b> " + features.properties.Reason;
+
+    // Create popup content
+    var popupContent = "<b>Road Name:</b> " + feature.properties.RoadName + "<br>" +
+                       "<b>Direction:</b> " + feature.properties.Direction + "<br>" +
+                       "<b>Start Time:</b> " + new Date(feature.properties.st).toDateString() + "<br>" +
+                       "<b>End Time:</b> " + new Date(feature.properties.fn).toDateString() + "<br>" +
+                       "<b>Reason:</b> " + feature.properties.Reason;
 
     // Bind popup to marker
     marker.bindPopup(popupContent);
+
+    // Add click event listener to the marker
+    marker.on('click', function() {
+      console.log('Marker clicked:', feature.properties);
+    });
+
     // Return the marker
     return marker;
   }
-
-  
 }).addTo(map);
 
 
@@ -171,7 +166,9 @@ map.fitBounds(geojsonLayer.getBounds());
 
 var heatLayer = L.heatLayer(geojsonData.features.map(function (feature) {
     return [feature.geometry.coordinates[1], feature.geometry.coordinates[0]];
+
 })).addTo(map);
+
 
 function moveSlider(value) {
     // Define the start and end dates

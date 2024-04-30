@@ -14,9 +14,10 @@
     <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"
    integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
    crossorigin=""></script>
-   <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+   <script src="https://leaflet.github.io/Leaflet.heat/dist/leaflet-heat.js"></script>
+   <!-- <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script> -->
    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
-   <script src="leaflet.heat.js"></script>
+   <!-- <script src="leaflet.heat.js"></script> -->
    <script src="closures.js"></script>
 </head>
 <style>
@@ -24,9 +25,9 @@
 .material-symbols-outlined {
     font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     display: inline-block;
-    color: rgb(220, 41, 41); /* Change color as needed */
-    font-family: 'Material Icons'; /* Make sure this is the correct font family */
-    font-size: 12px; /* Adjust size as needed */
+    color: rgb(220, 41, 41); 
+    font-family: 'Material Icons';
+    font-size: 12px;
 }
 
 #map { 
@@ -69,7 +70,7 @@
 
 <body>
     <h3 id="title">Road Closures During Hurricane Florence</h3>
-    <input id="dateSlider" type="range" name="Day" min="0" max="17" oninput="moveSlider(this.value)">
+    <input id="dateSlider" type="range" value="0" name="Day" min="0" max="17" oninput="moveSlider(this.value)">
     <div id="dateDisplay"></div>
     <div id="map"></div>
 
@@ -150,9 +151,21 @@ map.fitBounds(geojsonLayer.getBounds());
 
 var heatLayer = L.heatLayer(geojsonData.features.map(function (feature) {
     return [feature.geometry.coordinates[1], feature.geometry.coordinates[0]];
-
-})).addTo(map);
-
+}),  {
+    radius: 25,
+    blur: 15,
+    maxZoom: 10,
+    max: 1.8,
+    gradient: {
+        0.1: 'blue',
+        0.2: 'cyan',
+        0.4: 'lime',
+        0.6: 'yellow',
+        0.9: 'orange',
+        1.0: 'red'
+    }
+}
+).addTo(map);
 
 function moveSlider(value) {
     // Define the start and end dates
@@ -174,21 +187,6 @@ function moveSlider(value) {
         return selectedTime >= startTime && selectedTime <= endTime;
     });
 
-    // Update the heatmap layer based on the selected time
-    var heatData = geojsonData.features.filter(function (feature) {
-        var startTime = new Date(feature.properties.st).getTime();
-        var endTime = new Date(feature.properties.fn).getTime();
-        return selectedTime >= startTime && selectedTime <= endTime;
-    }).map(function (feature) {
-        return [feature.geometry.coordinates[1], feature.geometry.coordinates[0]];
-    });
-
-    // Update the heat map layer based on the filtered data
-    var heatData = filteredData.map(function (feature) {
-        return [feature.geometry.coordinates[1], feature.geometry.coordinates[0]];
-    });
-    heatLayer.setLatLngs(heatData);
-
     // Clear existing markers from the geojsonLayer
     geojsonLayer.clearLayers();
 
@@ -197,7 +195,14 @@ function moveSlider(value) {
         var marker = L.marker([feature.geometry.coordinates[1], feature.geometry.coordinates[0]], { icon: customIcon });
         geojsonLayer.addLayer(marker);
     });
+
+    // Update the heat map layer based on the filtered data
+    var heatData = filteredData.map(function (feature) {
+        return [feature.geometry.coordinates[1], feature.geometry.coordinates[0]];
+    });
+    heatLayer.setLatLngs(heatData);
 }
+  
 
 function updateDateDisplay(date) {
     var dateDisplay = document.getElementById('dateDisplay');

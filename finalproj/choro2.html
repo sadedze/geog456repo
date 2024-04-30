@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaflet with Slider</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css"integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ=="crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="crossorigin=""></script>
+    
+    <script src="data/chor.js"></script>
+    <style>
+        h1 {
+        font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        font-size: 36px;
+        position: relative;
+        top: 10%;
+        text-align: center;
+        outline-style: ridge;
+        -webkit-text-stroke-width: 1px;
+        }
+        h2 {
+            font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        }
+        h3 {
+            font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        }
+        .legend {
+            line-height: 18px;
+            color: #000;
+            background-color: #ffffff;
+        }
+        .legend i {
+            width: 18px;
+            height: 18px;
+            float: left;
+            margin-right: 8px;
+            opacity: 0.7; 
+        }
+        #map { height: 400px;
+            width: 900px;
+            background-color: lightslategray;
+            text-align: center; 
+        }
+    </style>
+</head>
+<body>
+    <h1>Annual Residential Water Use in Austin, Texas</h1>
+    <h2 id="theYear">Year</h2>
+    
+        <input type="range" name="Day" value="0" min="X2018.09.12" max="X2018.09.29" oninput="moveSlider(this.value)">
+        <div id="map"></div>
+        <div class="legend"></div>
+
+    <script>
+        //HW made by Colby Mask // Edited and annotated by J Arce
+
+        var map = L.map('map').setView([35, -80], 7);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+    
+        var selectedDate = 'X2018.09.12'
+        function myStyle(feature) {
+            // console.log(feature.properties[selectedDate]) //look at the console log and notice that selectedYear is the name of a property of the geojson, so this will give you the data for that feature. 
+            // console.log(getColor(feature.properties[selectedDate])) //look at the console log and notice that the selected year will result in a color. 
+
+            return {
+            "fillColor": getColor(feature.properties[selectedDate]),
+            "color": "black",// notice that the selected year is the name of a property of the geojson
+            "weight": 0.75,
+            "opacity": 2.0,
+            "fillOpacity": 0.7
+            }
+        };
+
+        function getColor(roadClosures) {
+            return roadClosures <= 25 ? "#f7fbff" 
+            :roadClosures <= 50 ? "#9ecae1" 
+            :roadClosures <= 75 ? "#4292c6"
+            :roadClosures <= 100 ? "#2171b5"
+            : "#08519c";
+        };
+
+
+        var ctyclosure = L.geoJSON(choropleth, {style: myStyle}).addTo(map);
+
+        function moveSlider(value) {
+            selectedDate = value; // this changes the value of the selectedYear variable
+            map.removeLayer(ctyclosure);// leaflet method to remove a layer / 
+            ctyclosure = L.geoJSON(choropleth, {style: myStyle});
+            map.addLayer(ctyclosure); // add the new layer
+            document.getElementById('theYear').innerHTML = 'Year: '+ value  
+        }
+        moveSlider('X2018.09.12')
+
+
+    </script>
+    <ul>
+        <li><a href="https://data.austintexas.gov/Utilities-and-City-Services/Austin-Water-Residential-Water-Consumption/sxk7-7k6z"><h3>Austin Water - Residential Water Consumption (CSV)</h3></a></li>
+        <li><a href="https://data.austintexas.gov/dataset/Boundaries-Zip-Code-Tabulation-Areas-2017/nf4y-c7ue"><h3>Boundaries: Zipcode Tabulation Areas, 2017 (Shapefile)</h3></a></li>
+    </ul>
+</body>
+</html>

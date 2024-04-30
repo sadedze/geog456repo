@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaflet with Slider</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css"integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ=="crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="crossorigin=""></script>
+    
+    <script src="data/chor.js"></script>
+    <style>
+        h1 {
+            font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+            font-size: 36px;
+            position: relative;
+            top: 10%;
+            text-align: center;
+            outline-style: ridge;
+            -webkit-text-stroke-width: 1px;
+        }
+        h2 {
+            font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        }
+        h3 {
+            font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        }
+        .legend {
+            line-height: 18px;
+            color: #000;
+            background-color: #ffffff;
+        }
+        .legend i {
+            width: 18px;
+            height: 18px;
+            float: left;
+            margin-right: 8px;
+            opacity: 0.7; 
+        }
+        #map {
+            height: 400px;
+            width: 900px;
+            background-color: lightslategray;
+            text-align: center; 
+            margin: auto; /* Center the map */
+            margin-top: 20px; /* Add space above the map */
+        }
+    </style>
+</head>
+<body>
+    <h1>Annual Residential Water Use in Austin, Texas</h1>
+    <h2 id="theYear">Year</h2>
+    
+    <input type="range" name="year" value="0" min="0" max="17" oninput="moveSlider(this.value)">
+    <div id="map"></div>
+    <div class="legend"></div>
+
+    <script>
+        var map = L.map('map').setView([35, -80], 7);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        var choroplethData = {
+            "type": "FeatureCollection",
+            "features": choropleth.features.map(function (feature) {
+                var newFeature = JSON.parse(JSON.stringify(feature));
+                return newFeature;
+            })
+        };
+        var selectedDate = "X" + (parseInt(value) + 12).toString().padStart(2, '0');
+
+        var myStyle = function (feature) {
+            var selectedDate = "X" + (parseInt(value) + 12).toString().padStart(2, '0');
+            var value = feature.properties[selectedDate];
+            console.log(value);
+            return {
+                fillColor: getColor(value),
+                color: 'black',
+                weight: 0.75,
+                opacity: 2.0,
+                fillOpacity: 0.7
+            };
+        };
+
+        var ctyclosure = L.geoJSON(choroplethData, { style: myStyle }).addTo(map);
+
+        function updateLayers(sliderValue) {
+            var selectedDate = "X" + (parseInt(sliderValue) + 12).toString().padStart(2, '0');
+            choroplethData.features.forEach(function (feature) {
+                feature.properties.value = feature.properties[selectedDate];
+            });
+
+            ctyclosure.clearLayers();
+            ctyclosure.addData(choroplethData);
+
+            document.getElementById('theYear').innerHTML = 'Year: ' + selectedDate.substring(1);
+        }
+
+        function moveSlider(value) {
+            updateLayers(value);
+        }
+
+        moveSlider('0');
+
+        function getColor(value) {
+            if (value == null) {
+                return "#f7fbff"; // Lightest blue for null values
+            }
+            else if (value <= 1) {
+                return "#f7fbff"; // Lightest blue for values less than or equal to 1
+            }
+            else if (value <= 25) {
+                return "#9ecae1"; // Light blue for values between 1 and 25
+            }
+            else if (value <= 50) {
+                return "#4292c6"; // Medium blue for values between 25 and 50
+            }
+            else if (value <= 75) {
+                return "#2171b5"; // Darker blue for values between 50 and 75
+            }
+            else if (value <= 100) {
+                return "#08519c"; // Even darker blue for values between 75 and 100
+            }
+            else {
+                return "#08306b"; // Darkest blue for values above 100
+            }
+        }
+    </script>
+</body>
+</html>

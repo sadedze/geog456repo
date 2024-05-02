@@ -53,9 +53,16 @@ df2 <- data.frame(aList) ## make the list into a dataframe
 
 ## now you will have to join this dataframe to the geojson with the 100 counties,
 
-df3 <- 
+# load in shp
+nc_cty <- counties(state = "NC")
+
+df3 <- df2 %>% 
+  inner_join(nc_cty, by = c("geoid" = "GEOID")) %>% 
+  select(-c("LSAD", "CLASSFP", "MTFCC", "CSAFP", "CBSAFP", "METDIVFP", "FUNCSTAT", "ALAND", "AWATER", "INTPTLAT", "INTPTLON", ))
 
 ## export the goejson,
+
+st_write(df3, "../data/choro.geojson", driver = "GeoJSON")
 
 ## make into a JS, and finally  
 

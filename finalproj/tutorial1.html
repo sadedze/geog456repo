@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css"
+   integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ=="
+   crossorigin=""/>
+   <style>
+    /* map size */
+    #map { height: 500px; }
+
+    /* icon styles */
+    .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            color: rgb(220, 41, 41);
+            font-family: 'Material Icons';
+            font-size: 12px;
+    }
+
+   </style>
+
+</head>
+<body>
+    <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"
+    integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
+    crossorigin=""></script>
+    <script src="closures.js"></script>
+
+    <!-- Create Map Div and id  -->
+    <div id="map"></div>
+
+<script>
+
+    //Create leaflet map centered on North Carolina
+    var map = L.map('map').setView([35, -80], 7);
+
+    //Add OSM tile layer
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+    //Create new geojson that turns lat and lon columns into a vector of geometry
+    var geojsonData = {
+        "type": "FeatureCollection",
+        "features": []
+        };
+        //loop iterating through the whole dataset for each data point
+        closures.forEach(function (dataPoint) {
+            var feature = {
+                "type": "Feature",
+                "properties": {
+                    "IncidentID": dataPoint.IncidentID,
+                    "start": dataPoint.start,
+                    "end": dataPoint.end,
+                    "RoadName": dataPoint.RoadName,
+                    "CommonName": dataPoint.CommonName,
+                    "Direction": dataPoint.Direction,
+                    "ConditionName": dataPoint.ConditionName,
+                    "IncidentType": dataPoint.IncidentType,
+                    "Event": dataPoint.Event,
+                    "EventName": dataPoint.EventName,
+                    "Reason": dataPoint.Reason,
+                    "DOTNotes": dataPoint.DOTNotes,
+                    "day": dataPoint.day,
+                    "flood": dataPoint.flood,
+                    "wind": dataPoint.wind,
+                    "winter": dataPoint.winter,
+                    "fog": dataPoint.fog,
+                    "rainevent": dataPoint.rainevent,
+                    "winterevent": dataPoint.winterevent,
+                    "cycloneevent": dataPoint.cycloneevent,
+                    "dur": dataPoint.dur,
+                    "noweather": dataPoint.noweather,
+                    "st": dataPoint.st,
+                    "fn": dataPoint.fn,
+                    "t": dataPoint.t,
+                    "te": dataPoint.te
+                },
+                "geometry": { //here is where the new lat/lon vector is located
+                    "type": "Point",
+                    "coordinates": [dataPoint.Longitude, dataPoint.Latitude]
+                }
+            };
+            geojsonData.features.push(feature); //adds entire feature to the geojsonData object
+        });
+
+   // Create unique icon (x for road closures)
+var customIcon = L.divIcon({
+    className: 'material-symbols-outlined',
+    iconAnchor: [5, 5],
+    html: '&#x2716;'
+});
+
+// Create geojson layer from closure data
+var geojsonLayer = L.geoJson(geojsonData, {
+    pointToLayer: function (feature, latlng) {
+        // Create marker with custom icon
+        var marker = L.marker(latlng, { icon: customIcon });
+
+        // Bind a popup to the marker
+        marker.bindPopup("<b>Road Name:</b> " + feature.properties.RoadName + "<br>" +
+                   "<b>Direction:</b> " + feature.properties.Direction + "<br>" +
+                   "<b>Start Time:</b> " + new Date(feature.properties.st).toDateString() + "<br>" +
+                   "<b>End Time:</b> " + new Date(feature.properties.fn).toDateString() + "<br>" +
+                   "<b>Reason:</b> " + feature.properties.Reason);
+
+        return marker;
+    }
+}).addTo(map);
+
+    
+
+</script>
+
+    
+</body>
+</html>

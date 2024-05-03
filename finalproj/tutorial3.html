@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css"
+   integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ=="
+   crossorigin=""/>
+   <link rel="stylesheet" href="https://unpkg.com/leaflet.heat/dist/leaflet.heat.css" />
+   <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css">
+   <style>
+body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+}
+#map-container {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        flex-direction: row;
+        }
+    #map {
+        flex: 1;
+        height: 100%;
+    }
+    #sidebar {
+            width: 350px; /* Set the width of the sidebar*/
+            height: 100%; /* Set the height of the sidebar to 100% of its container's height */
+            background-color: #f9f9f9; /* Set the background color of the sidebar to gray */
+            padding: 20px; /* Add margins inside the sidebar */
+    }
+
+    /* icon styles */
+    .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            color: rgb(220, 41, 41);
+            font-family: 'Material Icons';
+            font-size: 12px;
+    }
+    #dateSlider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 15px;
+            border-radius: 5px;
+            background: #d3d3d3;
+            outline: none;
+            opacity: 0.7;
+            -webkit-transition: .2s;
+            transition: opacity .2s;
+            
+        }
+        #dateSlider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: #04AA6D;
+            cursor: pointer;
+        }
+        #dateSlider::-moz-range-thumb {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: #04AA6D;
+            cursor: pointer;
+        }
+        #sidebar h3 {
+            font-size: 18px;
+            font-weight: normal;
+            margin-top: 30px;
+        }
+
+   </style>
+
+</head>
+<body>
+    <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"
+    integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
+    crossorigin=""></script>
+    <script src="https://leaflet.github.io/Leaflet.heat/dist/leaflet-heat.js"></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+    <script src="closures.js"></script>
+    <!-- create container for sidebar and map -->
+    <div id="map-container">
+        <div id="sidebar">
+            <h1>NC Road Closures During Hurricane Florence</h1>
+            <h2>Date: <span id="dateDisplay"></span></h2>
+            <input id="dateSlider" type="range" value="0" name="Day" min="0" max="17" oninput="moveSlider(this.value)">
+            <h3>Hurricane Florence made landfall at Wrightsville Beach, North Carolina, on September 14, 2018. Florence was among the most expensive floods in US history, 
+                costing the state of North Carolina alone an estimated $22 billion. Over 140,000 North Carolinians registered for federal disaster assistance, and nearly 
+                75,000 structures flooded. The record-breaking precipitation and inundation severely compromised roads. In the southeastern part of the state, nearly every 
+                major road and highway flooded, with many remaining impassable for several days after Florence had dissipated.<br></h3>
+<a href="https://www.nhc.noaa.gov/data/tcr/AL062018_Florence.pdf" target="_blank">Source</a>
+        </div>
+
+        <!-- Create Map Div and id  -->
+        <div id="map"></div>
+    </div>
+
+
+<script>
+
+    //Create leaflet map centered on North Carolina
+    var map = L.map('map').setView([35, -80], 7);
+
+    //Add OSM tile layer
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+    //Create new geojson that turns lat and lon columns into a vector of geometry
+    var geojsonData = {
+        "type": "FeatureCollection",
+        "features": []
+        };
+        //loop iterating through the whole dataset for each data point
+        closures.forEach(function (dataPoint) {
+            var feature = {
+                "type": "Feature",
+                "properties": {
+                    "IncidentID": dataPoint.IncidentID,
+                    "start": dataPoint.start,
+                    "end": dataPoint.end,
+                    "RoadName": dataPoint.RoadName,
+                    "CommonName": dataPoint.CommonName,
+                    "Direction": dataPoint.Direction,
+                    "ConditionName": dataPoint.ConditionName,
+                    "IncidentType": dataPoint.IncidentType,
+                    "Event": dataPoint.Event,
+                    "EventName": dataPoint.EventName,
+                    "Reason": dataPoint.Reason,
+                    "DOTNotes": dataPoint.DOTNotes,
+                    "day": dataPoint.day,
+                    "flood": dataPoint.flood,
+                    "wind": dataPoint.wind,
+                    "winter": dataPoint.winter,
+                    "fog": dataPoint.fog,
+                    "rainevent": dataPoint.rainevent,
+                    "winterevent": dataPoint.winterevent,
+                    "cycloneevent": dataPoint.cycloneevent,
+                    "dur": dataPoint.dur,
+                    "noweather": dataPoint.noweather,
+                    "st": dataPoint.st,
+                    "fn": dataPoint.fn,
+                    "t": dataPoint.t,
+                    "te": dataPoint.te
+                },
+                "geometry": { //here is where the new lat/lon vector is located
+                    "type": "Point",
+                    "coordinates": [dataPoint.Longitude, dataPoint.Latitude]
+                }
+            };
+            geojsonData.features.push(feature); //adds entire feature to the geojsonData object
+        });
+
+   // Create unique icon (x for road closures)
+var customIcon = L.divIcon({
+    className: 'material-symbols-outlined',
+    iconAnchor: [5, 5],
+    html: '&#x2716;'
+});
+
+// Create geojson layer from closure data
+var geojsonLayer = L.geoJson(geojsonData, {
+    pointToLayer: function (feature, latlng) {
+        // Create marker with custom icon
+        var marker = L.marker(latlng, { icon: customIcon });
+
+        // Bind a popup to the marker
+        marker.bindPopup("<b>Road Name:</b> " + feature.properties.RoadName + "<br>" +
+                   "<b>Direction:</b> " + feature.properties.Direction + "<br>" +
+                   "<b>Start Time:</b> " + new Date(feature.properties.st).toDateString() + "<br>" +
+                   "<b>End Time:</b> " + new Date(feature.properties.fn).toDateString() + "<br>" +
+                   "<b>Reason:</b> " + feature.properties.Reason);
+
+        return marker;
+    }
+}).addTo(map);
+
+//Create heatmap layer
+var heatLayer = L.heatLayer(geojsonData.features.map(function (feature) {
+            return [feature.geometry.coordinates[1], feature.geometry.coordinates[0]];
+        }), {
+            radius: 25,
+            blur: 15,
+            maxZoom: 10,
+            max: 1.8,
+            gradient: {
+                0.1: 'blue',
+                0.2: 'cyan',
+                0.4: 'lime',
+                0.6: 'yellow',
+                0.9: 'orange',
+                1.0: 'red'
+            }
+        }).addTo(map);
+
+// Create slider function
+function moveSlider(value) {
+    // Define start and end dates
+    var startDate = new Date("2018-09-12T00:00:00Z");
+    var endDate = new Date("2018-09-29T23:59:59Z");
+    
+    // Calculate total duration in milliseconds
+    var totalDuration = endDate.getTime() - startDate.getTime();
+    
+    // Calculate the selected time based on the slider value, make it a proportion of 17
+    var selectedTime = new Date(startDate.getTime() + (totalDuration * value / 17));
+
+    // Filter geojsonData based on selected time
+    var filteredData = geojsonData.features.filter(function (feature) {
+        var startTime = new Date(feature.properties.st).getTime();
+        var endTime = new Date(feature.properties.fn).getTime();
+        return selectedTime >= startTime && selectedTime <= endTime;
+    });
+
+    // Clear existing markers from geojsonLayer
+    geojsonLayer.clearLayers();
+
+    // Add markers for filtered data to geojsonLayer
+    filteredData.forEach(function (feature) {
+        var marker = L.marker([feature.geometry.coordinates[1], feature.geometry.coordinates[0]], { icon: customIcon });
+        geojsonLayer.addLayer(marker);
+    });
+    //Create variable to store filtered data points for heatlayer 
+    var heatData = filteredData.map(function (feature) {
+                return [feature.geometry.coordinates[1], feature.geometry.coordinates[0]];
+            });
+            //direct heatlayer to pull from heatData
+            heatLayer.setLatLngs(heatData);
+    //Use value from selectedTime to update the date at the top of page as slider moves
+    updateDateDisplay(selectedTime);
+}
+
+function updateDateDisplay(date) {
+        //create var that updates date display element at top of page
+        var dateDisplay = document.getElementById('dateDisplay');
+        //Transform date into readable text
+        dateDisplay.textContent = date.toDateString();
+        }
+    //Add layer control to toggle back and forth between layers
+        var baseLayers = {
+            "Heatmap": heatLayer,
+            "Points": geojsonLayer
+        };
+
+        L.control.layers(null, baseLayers).addTo(map);
+        
+        map.addLayer(heatLayer);
+        map.addLayer(geojsonLayer);
+
+        //create search location icon
+        var geocoder = L.Control.geocoder({
+            geocoder: L.Control.Geocoder.nominatim(),
+            defaultMarkGeocode: false,
+            placeholder: "Search Location",
+            collapsed: true,
+            query: ""
+        }).on('markgeocode', function (e) {
+            var latlng = e.geocode.center;
+            map.setView(latlng, map.getZoom());
+            map.fitBounds(e.geocode.bbox);
+        }).addTo(map);
+
+
+//Start with empty map
+moveSlider(0)
+
+</script>
+
+    
+</body>
+</html>

@@ -22,8 +22,7 @@ highlight:
 
 The road closure data was retrieved from the North Carolina Department of Transportation Traveler Information System (TIMS). The dataset was filtered to include only road closure points that were recorded during the incident period of Hurricane Florence (September 12th - September 29th, 2018).
 
-The dataset provided information on how long the road closure lasted. I formatted the start and end date for each road closure into an asPOSIXCT format that both R and Javascript could read and calculate as values. 
-
+The dataset provided information on how long the road closure lasted. I formatted the start and end date for each road closure into an asPOSIXCT format that both R and Javascript could read and calculate as values.
 
 ```{r, eval=FALSE}
 ## format start and end into time
@@ -31,7 +30,7 @@ df$st <- as.POSIXct(df$start, format = "%Y-%m-%dT%H:%M:%SZ")
 df$fn <- as.POSIXct(df$end, format = "%Y-%m-%dT%H:%M:%SZ")
 ```
 
-I then saved this new dataset as a JSON. See part of the dataset below.
+I then saved this new dataset as a JSON.
 
 ```{r, eval=FALSE}
 # Convert data to JSON
@@ -41,10 +40,9 @@ json_data <- toJSON(df2)
 write(json_data, "finalproj/data.json")
 ```
 
-
 ## Create a Leaflet Map
 
-Next, in visual studio code, I created an html document and made a simple leaflet map centered on North Carolina. I first copied the CSS stylesheet, the source script. The style sheet and the source script allow you to use commands and styles specific to leaflet.  
+Next, in visual studio code, I created an html document and made a simple leaflet map centered on North Carolina. I first copied the CSS stylesheet and the source script, which allows you to use commands and styles specific to leaflet.
 
 CSS Style Sheet
 
@@ -63,21 +61,21 @@ Source Script
     <script src="closures.js"></script>
 ```
 
-Then I created a `div` (a container) for the map and gave it an `id`. The `id` allows me to then give the map dimensions in the CSS code by `#map`. To reference an object `id` in CSS, use a #. 
+Then I created a `div` (a container) for the map and gave it an `id`. The `id` allows me to then give the map dimensions in the CSS code using `#map`. To reference an object `id` in CSS, use a #.
 
 ``` {.code .html}
 <!-- Create Map Div and id  -->
     <div id="map"></div>
 ```
 
-```{.code .css}
+``` {.code .css}
 /* map size */
     #map { height: 500px; }
 ```
 
-Next, I created a leaflet map centered on North Carolina and added an OSM tile layer to the map. Source: Leaflet Quick Start Guide
+Next, I created a leaflet map centered on North Carolina and added an OSM tile layer to the map.
 
-```{.code .js}
+``` {.code .js}
 //Create leaflet map centered on North Carolina
     var map = L.map('map').setView([35, -80], 7);
 
@@ -89,17 +87,17 @@ Next, I created a leaflet map centered on North Carolina and added an OSM tile l
         }).addTo(map);
 ```
 
-Next, I imported the JSON of road closures and created a javascript file from the json, naming the file closures. 
+Next, I imported the JSON of road closures and created a javascript file from the json, naming the file closures.
 
 I then added a script src line of code to connect the html to the JS file with the data.
 
-```{.code .js}
+``` {.code .js}
 <script src="closures.js"></script>
 ```
 
-My original dataset had longitude and latitude in two different columns, and they need to be in the same column as a vector to be read by javascript. The following lines of code create a new variable, geojsonData, which has all the data from my dataset, but one singular column for latitude and longitude as a vector.
+My original dataset had longitude and latitude in two different columns, and they need to be in the same column as a vector to be read by javascript. The following lines of code create a new variable, `geojsonData`, which has all the data from my dataset, but one singular column for latitude and longitude as a vector.
 
-```{.code .js}
+``` {.code .js}
  //Create new geojson that turns lat and lon columns into a vector of geometry
     var geojsonData = {
         "type": "FeatureCollection",
@@ -146,9 +144,9 @@ My original dataset had longitude and latitude in two different columns, and the
         });
 ```
 
-I then created a custom icon for the road closures. To change the points to an “x” to symbolize a road closure, I made an “x” icon using unicode characters, a built-in library of common symbols. Each symbol has a code. (Note: Some unicode symbols only work with particular fonts, otherwise they will just show up as squares.) I use L.divIcon instead of the default L.Icon because a div icon makes a lightweight icon for markers that uses a simple `div` element instead of an image, which can take longer to load. I have a lot of points, so this method is better for me than a png. 
+I then created a custom icon for the road closures. To change the points to an “x” to symbolize a road closure, I made an “x” icon using unicode characters, a built-in library of common symbols. Each symbol has a code. (Note: Some unicode symbols only work with particular fonts, otherwise they will just show up as squares.) I use `L.divIcon` instead of the default `L.Icon` because a `div` icon makes a lightweight icon for markers that uses a simple `div` element instead of an image, which can take longer to load. I have a lot of points, so this method is better for me than a png.
 
-```{.code .js}
+``` {.code .js}
 //Create unique icon (x for road closures)
     var customIcon = L.divIcon({
             className: 'material-symbols-outlined', //give class for CSS purposes
@@ -159,7 +157,7 @@ I then created a custom icon for the road closures. To change the points to an �
 
 I added these CSS elements for the icon
 
-```{.code .css}
+``` {.code .css}
 /* icon styles */
     .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
@@ -172,7 +170,7 @@ I added these CSS elements for the icon
 
 Then I created a geojson layer, using the point to layer leaflet plugin to place the points on the map. I also created a popup that provided content on each particular closure when the point was clicked.
 
-```{.code .js}
+``` {.code .js}
 // Create geojson layer from closure data
 var geojsonLayer = L.geoJson(geojsonData, {
     pointToLayer: function (feature, latlng) {
@@ -193,11 +191,11 @@ var geojsonLayer = L.geoJson(geojsonData, {
 }).addTo(map);
 ```
 
-Here is what the first iteration of my map looked like with each road closure point appearing as an “x” on the map.
+Here is what the first iteration of my map looked like with each road closure point appearing as an “x” on the map. Zoom in and click to get information about a road closure!
 
 ### First Iteration
 
-```{=html} 
+```{=html}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -290,22 +288,20 @@ var geojsonLayer = L.geoJson(geojsonData, {
     
 </body>
 </html>
-
 ```
-
 ## Create Slider
 
 Next, I added the time component. I created a slider, gave it an id for CSS (style) purposes. The min and max reflected the range of days I wanted to capture (September 12th - September 29th, 2018, 17 days).
 
-```{.code .html}
+``` {.code .html}
 <input id="dateSlider" type="range" value="0" name="Day" min="0" max="17" oninput="moveSlider(this.value)">
 ```
 
-I then created the function, moveSlider to reflect the number of road closures over time. Each road closure point had a start time and end time. I designed the function so that the point appears on the day it starts and disappears on the day it ends. 
+I then created the function, `moveSlider` to reflect the number of road closures over time. Each road closure point had a start time and end time. I designed the function so that the point appears on the day it starts and disappears on the day it ends.
 
-First I make the dates compatible with the slider range (0 to 17). I define variables for the start and end date of my date range so I can manipulate them more easily. I need to make September 12th = 0 and September 29th = 17. getTime() is a JavaScript command that works with Date objects and returns the numeric value corresponding to the specified time. I calculate each date as a proportion of 17 so it corresponds to the value of the slider.
+First I make the dates compatible with the slider range (0 to 17). I define variables for the start and end date of my date range so I can manipulate them more easily. I need to make September 12th = 0 and September 29th = 17. `getTime()` is a JavaScript command that works with Date objects and returns the numeric value corresponding to the specified time. I calculate each date as a proportion of 17 in the variable `selectedTime` so it corresponds to the value of the slider.
 
-```{.code .js}
+``` {.code .js}
 // Create slider function
 function moveSlider(value) {
     // Define start and end dates
@@ -319,9 +315,9 @@ function moveSlider(value) {
     var selectedTime = new Date(startDate.getTime() + (totalDuration * value / 17));
 ```
 
-The function then filters geojsonData to find features that fall within the selectedTime range and adds markers for these features to the geojsonLayer. If the selectedTime is greater than the startTime and less than the endTime, the point appears. If it falls outside that range, the point does not appear. 
+The function then filters geojsonData to find features that fall within the `selectedTime` range and adds markers for these features to the geojsonLayer. If the `selectedTime` is greater than the `startTime` and less than the `endTime`, the point appears. If it falls outside that range, the point does not appear.
 
-```{.code .js}
+``` {.code .js}
 // Filter geojsonData based on selected time
     var filteredData = geojsonData.features.filter(function (feature) {
         var startTime = new Date(feature.properties.st).getTime();
@@ -330,16 +326,16 @@ The function then filters geojsonData to find features that fall within the sele
     });
 ```
 
-Once my points are coded to appear and disappear when I want them to, I add a line of code that clears the markers on the map each time the slider is moved, so the points don’t populate on top of each other. 
+Once my points are coded to appear and disappear when I want them to, I add a line of code that clears the markers on the map each time the slider is moved, so the points don’t populate on top of each other.
 
-```{.code .js}
+``` {.code .js}
  // Clear existing markers from geojsonLayer
     geojsonLayer.clearLayers();
 ```
 
-After clearing the map, I add the markers to the map according the logic of filterdData. This is the end of my slider function, which iterates through the entire dataset. 
+After clearing the map, I add the markers to the map according the logic of `filterdData`. This is the end of my slider function, which iterates through the entire dataset.
 
-```{.code .js}
+``` {.code .js}
 // Add markers for filtered data to geojsonLayer
     filteredData.forEach(function (feature) {
         var marker = L.marker([feature.geometry.coordinates[1], feature.geometry.coordinates[0]], { icon: customIcon });
@@ -348,9 +344,9 @@ After clearing the map, I add the markers to the map according the logic of filt
 }
 ```
 
-I then write code to make sure my slider starts at zero each time the page is refreshed. 
+I then write code to make sure my slider starts at zero each time the page is refreshed.
 
-```{.code .js}
+``` {.code .js}
 //Start with empty map
 moveSlider(0)
 ```
@@ -512,27 +508,28 @@ moveSlider(0)
     
 </body>
 </html>
-
 ```
-
 ## Create Heat Map
 
 The point layer is nice, but very crowded. I want to find another way to convey the scale of road closures. I create another map layer that visualizes point density: a heatmap.
 
-To create a heatmap, I used a leaflet heatmap plugin called Leaflet.heat. First, add the style sheet and the source script to the html. 
+To create a heatmap, I used a leaflet heatmap plugin called Leaflet.heat. First, I add the style sheet and the source script to the html.
 
 Style Sheet
-```{.code .html}
+
+``` {.code .html}
 <link rel="stylesheet" href="https://unpkg.com/leaflet.heat/dist/leaflet.heat.css" />
 ```
+
 Source Script
-```{.code .html}
+
+``` {.code .html}
 <script src="https://leaflet.github.io/Leaflet.heat/dist/leaflet-heat.js"></script>
 ```
 
 I created a second map layer for the heatmap. Because there are so many data points, this particular dataset makes the heatmap all one color. This can be adjusted by customizing the gradient, max and radius values. I edited the max and gradient values so that they reflected the full distribution of my data.
 
-```{.code .js}
+``` {.code .js}
 var heatLayer = L.heatLayer(geojsonData.features.map(function (feature) {
             return [feature.geometry.coordinates[1], feature.geometry.coordinates[0]];
         }), {
@@ -551,9 +548,9 @@ var heatLayer = L.heatLayer(geojsonData.features.map(function (feature) {
         }).addTo(map);
 ```
 
-Then, with the help of ChatGPT, I added these lines of code to the bottom of the moveSlider function to incorporate the heat map layer, so the heatmap layer would be synchronized with the point layer. 
+Then, with the help of ChatGPT, I added these lines of code to the bottom of the moveSlider function to incorporate the heat map layer, so the heatmap layer would be synchronized with the point layer.
 
-```{.code .js}
+``` {.code .js}
 //Create variable to store filtered data points for heatlayer
     var heatData = filteredData.map(function (feature) {
                 return [feature.geometry.coordinates[1], feature.geometry.coordinates[0]];
@@ -562,43 +559,17 @@ Then, with the help of ChatGPT, I added these lines of code to the bottom of the
             heatLayer.setLatLngs(heatData);
 ```
 
-### Photo of Heat Map and Point Layer w/o 
+Here is a photo of what we're working with.
 
-
+![](images/heat.pt.png)
 
 ## Customization and Aesthetics
 
-This is a functional map. But I want to add some customizable features for the user, and add some information to let the reader know what I’m visualizing. 
+This is a functional map. But I want to add some customizable features for the user, and add some information to let the reader know what I’m visualizing. The heat layer and point layer on top of one another make the visualization muddled.
 
-I add a title and a date to the map. I use <span></span> for the date, because it will have dynamic content. I want to synchronize the date to the movement of the slider. 
+Next, I created added layer switching controls for both layers. I defined the two layers, added the baselayer control object to the map, and added both layers to the map. Now the user can decide to look at the point or heat layer. 
 
-```{.code .html}
-<h1>NC Road Closures During Hurricane Florence</h1>
-<h2>Date: <span id="dateDisplay"></span></h2>
-```
-
-Next, I create a function to update the date based on the slider value. I create a variable that connects the function to the h2 element above using the getElementById command. Then I change the date format so it returns to readable text. 
-
-```{.code .js}
-function updateDateDisplay(date) {
-            //create var that updates date display element at top of page
-            var dateDisplay = document.getElementById('dateDisplay');
-            //Transform date into readable text
-            dateDisplay.textContent = date.toDateString();
-        }
-```
-
-But how does the function know which date to choose? It relies on the slider value, which is also the earlier variable I created, selectedTime. Within the moveSlider function, I apply the updateDateDisplay function to the selectedTime. Now it will update each time the slider moves. 
-
-```{.code .js}
-updateDateDisplay(selectedTime);
-```
-
-The map is looking better, but the heat layer and point layer on top of one another make the visualization muddled. 
-
-Next, I created added layer switching controls for both layers. I defined the two layers, added the baselayer control object to the map, and added both layers to the map.
-
-```{.code .js}
+``` {.code .js}
 //Add layer control to toggle back and forth between layers
         var baseLayers = {
             "Heatmap": heatLayer,
@@ -612,21 +583,23 @@ Next, I created added layer switching controls for both layers. I defined the tw
         map.addLayer(geojsonLayer);
 ```
 
-For the search address feature, I used the geocoder plugin from leaflet called Leaflet Control Geocoder. You know the drill. Insert the plugin’s style sheet and source script. 
+For the search address feature, I used the geocoder plugin from leaflet called Leaflet Control Geocoder. You know the drill. Insert the plugin’s style sheet and source script.
 
 Style Sheet
-```{.code .html}
+
+``` {.code .html}
 <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css">
 ```
 
 Source Script
-```{.code .html}
+
+``` {.code .html}
 <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
 ```
 
-I then customized the code to have a search icon and the words “Search Location” in the text box once the icon has been clicked. 
+I then customized the code to have a search icon and the words “Search Location” in the text box once the icon has been clicked.
 
-```{.code .js}
+``` {.code .js}
 //create search location icon
         var geocoder = L.Control.geocoder({
             geocoder: L.Control.Geocoder.nominatim(),
@@ -641,9 +614,37 @@ I then customized the code to have a search icon and the words “Search Locatio
         }).addTo(map);
 ```
 
-Now I’ll add some more aesthetic features to the website itself. Using the w3school’s Round Slider CSS code, I customized my slider design. 
+Layer Control and Geocoder appear in the top right corner of the map. 
 
-```{.code .css}
+![](images/layer.geocoder.png)
+
+I add a title and a date to the map. I use `<span></span>` for the date, because it will have dynamic content. I want to synchronize the date to the movement of the slider.
+
+``` {.code .html}
+<h1>NC Road Closures During Hurricane Florence</h1>
+<h2>Date: <span id="dateDisplay"></span></h2>
+```
+
+Next, I create a function to update the date based on the slider value. I create a variable that connects the function to the h2 element above using the getElementById command. Then I change the date format so it returns to readable text.
+
+``` {.code .js}
+function updateDateDisplay(date) {
+            //create var that updates date display element at top of page
+            var dateDisplay = document.getElementById('dateDisplay');
+            //Transform date into readable text
+            dateDisplay.textContent = date.toDateString();
+        }
+```
+
+But how does the function know which date to choose? It relies on the slider value, which is also the earlier variable I created, selectedTime. *Within* the moveSlider function, I apply the updateDateDisplay function to the selectedTime. Now it will update each time the slider moves.
+
+``` {.code .js}
+updateDateDisplay(selectedTime);
+```
+
+Now I’ll add some more aesthetic features to the website itself. Using the w3school’s Round Slider CSS code, I customized my slider design.
+
+``` {.code .css}
 #dateSlider {
             -webkit-appearance: none;
             width: 100%;
@@ -673,9 +674,9 @@ Now I’ll add some more aesthetic features to the website itself. Using the w3s
             cursor: pointer;
 ```
 
-I want the map to take up most of the page, and I want the slider and text to move to the lefthand side of the page. I also want to leave room for some background text on Hurricane Florence. I do this by creating a div element called sidebar and placing my title, date, and slider with it. 
+I want the map to take up most of the page, and I want the slider and text to move to the lefthand side of the page. I also want to leave room for some background text on Hurricane Florence. I do this by creating a div element called sidebar and placing my title, date, and slider with it.
 
-```{.code .html}
+``` {.code .html}
     <h1>NC Road Closures During Hurricane Florence</h1>
     <h2>Date: <span id="dateDisplay"></span></h2>
     <!-- Create slider -->
@@ -683,9 +684,9 @@ I want the map to take up most of the page, and I want the slider and text to mo
     </div>
 ```
 
-Then I create another div that will encompass both the sidebar and the map called map container. 
+Then I create another div that will encompass both the sidebar and the map called map container.
 
-```{.code .html}
+``` {.code .html}
 <div id="map-container"></div>
         <div id="sidebar">
             <h1>NC Road Closures During Hurricane Florence</h1>
@@ -700,9 +701,9 @@ Then I create another div that will encompass both the sidebar and the map calle
     </div>
 ```
 
-I add this css code. I set the sidebar and map to have positions relative to each other. Using 100vw and 100vh, I direct the map and sidebar to take up the entire screen (100% of viewport height and width). The display code places the sidebar on the left side of the screen. The CSS for the map div sets the maps width to take up the remaining space after the sidebar's width is taken into account (flex: 1;), and sets its height to 100% of the map-container. Then I set the width and height of the sidebar, the background color, and margins. Notice how the id’s I assigned earlier are used for each object. 
+I add this css code. I set the sidebar and map to have positions relative to each other. Using 100vw and 100vh, I direct the map and sidebar to take up the entire screen (100% of viewport height and width). The display code places the sidebar on the left side of the screen. The CSS for the map div sets the maps width to take up the remaining space after the sidebar's width is taken into account (flex: 1;), and sets its height to 100% of the map-container. Then I set the width and height of the sidebar, the background color, and margins. Notice how the id’s I assigned earlier are used for each object.
 
-```{.code .css}
+``` {.code .css}
 #map-container {
         position: relative;
         width: 100vw;
@@ -722,7 +723,7 @@ I add this css code. I set the sidebar and map to have positions relative to eac
     }
 ```
 
-Lastly, I add an h3 element containing the background text about Hurricane Florence within the sidebar div. To hyperlink a word, I use `<a href></>`. `target=”blank”` opens the link in a new tab when it is clicked. 
+Lastly, I add an h3 element containing the background text about Hurricane Florence within the sidebar div. To hyperlink a word, I use `<a href></>`. `target=”blank”` opens the link in a new tab when it is clicked.
 
 ``` {.code .html}
 <div id="sidebar">
@@ -735,9 +736,9 @@ Lastly, I add an h3 element containing the background text about Hurricane Flore
         </div>
 ```
 
-I add some CSS to increase font size, unbold it, and add space between the words and the slider. 
+I add some CSS to increase font size, unbold it, and add space between the words and the slider.
 
-```{.code .css}
+``` {.code .css}
 #sidebar h3 {
             font-size: 18px;
             font-weight: normal;
@@ -854,7 +855,7 @@ body {
     <div id="map-container3">
         <div id="sidebar3">
             <h1>NC Road Closures During Hurricane Florence</h1>
-            <h2>Date: <span id="dateDisplay3"></span></h2>
+            <h2>Date: <span id="dateDisplay"></span></h2>
             <input id="dateSlider3" type="range" value="0" name="Day" min="0" max="17" oninput="moveSlider(this.value)">
             <h3>Hurricane Florence made landfall at Wrightsville Beach, North Carolina, on September 14, 2018. Florence was among the most expensive floods in US history, 
                 costing the state of North Carolina alone an estimated $22 billion. Over 140,000 North Carolinians registered for federal disaster assistance, and nearly 
@@ -1015,9 +1016,9 @@ function moveSlider(value) {
 
 function updateDateDisplay(date) {
         //create var that updates date display element at top of page
-        var dateDisplay3 = document.getElementById('dateDisplay3');
+        var dateDisplay = document.getElementById('dateDisplay');
         //Transform date into readable text
-        dateDisplay3.textContent = date.toDateString();
+        dateDisplay.textContent = date.toDateString();
         }
     //Add layer control to toggle back and forth between layers
         var baseLayers = {
@@ -1053,8 +1054,3 @@ moveSlider(0)
 </body>
 </html>
 ```
-
-
-helpful links
-
-quarto: https://quarto.org/docs/output-formats/html-code.html qmd vs code? : https://quarto.org/docs/tools/vscode.html

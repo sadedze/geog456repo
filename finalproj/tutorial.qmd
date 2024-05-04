@@ -10,7 +10,7 @@ format:
     code-overflow: wrap
     code-tools:
       source: true
-      toggle: false
+      toggle: true
       caption: none
 editor: visual
 highlight:

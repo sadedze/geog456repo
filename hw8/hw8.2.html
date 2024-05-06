@@ -19,11 +19,16 @@
         position: absolute;
     }
 
-    #before{
+    #one{
         z-index: 1;
         opacity: 1;
     }
-    #after{
+    #two{
+        z-index: 2;
+        opacity: .5;
+    }
+
+    #three{
         z-index: 3;
         opacity: 0;
     }
@@ -46,18 +51,22 @@ input {
 
 </style>
 <body>
-<h1>Carrboro Over The Years</h1>
+<h1>Annandale, VA 2004-2018</h1>
 <input type="range" id="year" name="year" list="tickmarks" value="0" oninput="myFunction(this.value)"/>
 <datalist id="tickmarks">
   <option value="0" label="2004"></option>
-  <option value="100" label="2020"></option>
+  <option value="50" label="2012"></option>
+  <option value="100" label="2018"></option>
 </datalist>
 
 <div id="image_container">
-        <img id="before" src="carrboro2012.png" alt="">
-        <img id="after"  src="carrboro2020.png" alt="">
+        <img id="one" src="an2004.png" alt="">
+        <img id="two"  src="an2012.png" alt="">
+        <img id="three"  src="an2018.png" alt="">
+
+
+
     </div>
-    
 <script>
     function myFunction(e) {
         console.log(e)

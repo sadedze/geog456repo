@@ -1,7 +1,22 @@
+var geometry = 
+    /* color: #d63000 */
+    /* shown: false */
+    /* displayProperties: [
+      {
+        "type": "rectangle"
+      }
+    ] */
+    ee.Geometry.Polygon(
+        [[[-77.22714259530639, 38.83850984477243],
+          [-77.22714259530639, 38.828815216642035],
+          [-77.20467641259765, 38.828815216642035],
+          [-77.20467641259765, 38.83850984477243]]], null, false);
+
+
 // You need to create a geometry, otherwise this will not work. 
 
-var yearBefore = '2012'
-var yearAfter = '2020'
+var yearBefore = '2004'
+var yearAfter = '2018'
 
 // var dataset = ee.ImageCollection('USDA/NAIP/DOQQ')
 //                   .filter(ee.Filter.date('2017-01-01', '2018-12-31'));
@@ -30,14 +45,14 @@ var trueColorVis = {
 // Code from:
 // https://medium.com/google-earth/histogram-matching-c7153c85066d
 // Create a lookup table to make sourceHist match targetHist.
-var lookup = function(sourceHist, targetHist) {
+var lookup = function(befImg, aftImg) {
   // Split the histograms by column and normalize the counts.
-  var sourceValues = sourceHist.slice(1, 0, 1).project([0])
-  var sourceCounts = sourceHist.slice(1, 1, 2).project([0])
+  var sourceValues = befImg.slice(1, 0, 1).project([0])
+  var sourceCounts = befImg.slice(1, 1, 2).project([0])
   sourceCounts = sourceCounts.divide(sourceCounts.get([-1]))
 
-  var targetValues = targetHist.slice(1, 0, 1).project([0])
-  var targetCounts = targetHist.slice(1, 1, 2).project([0])
+  var targetValues = aftImg.slice(1, 0, 1).project([0])
+  var targetCounts = aftImg.slice(1, 1, 2).project([0])
   targetCounts = targetCounts.divide(targetCounts.get([-1]))
 
   // Find first position in target where targetCount >= srcCount[i], for each i.
@@ -49,8 +64,8 @@ var lookup = function(sourceHist, targetHist) {
 }
 
 // Make the histogram of sourceImg match targetImg.
-var histogramMatch = function(sourceImg, targetImg) {
-  var geom = sourceImg.geometry()
+var histogramMatch = function(befImg, aftImg) {
+  var geom = befImg.geometry()
   var args = {
     reducer: ee.Reducer.autoHistogram({maxBuckets: 256, cumulative: true}), 
     geometry: geom,
@@ -61,15 +76,15 @@ var histogramMatch = function(sourceImg, targetImg) {
   
   // Only use pixels in target that have a value in source
   // (inside the footprint and unmasked).
-  var source = sourceImg.reduceRegion(args)
-  var target = targetImg.updateMask(sourceImg.mask()).reduceRegion(args)
+  var source = befImg.reduceRegion(args)
+  var target = aftImg.updateMask(sourceImg.mask()).reduceRegion(args)
 
   return ee.Image.cat(
-    sourceImg.select(['R'])
+    befImg.select(['R'])
       .interpolate(lookup(source.getArray('R'), target.getArray('R'))),
-    sourceImg.select(['G'])
+    befImg.select(['G'])
       .interpolate(lookup(source.getArray('G'), target.getArray('G'))),
-    sourceImg.select(['B'])
+    befImg.select(['B'])
       .interpolate(lookup(source.getArray('B'), target.getArray('B')))
   )
 }
@@ -80,7 +95,7 @@ var result = histogramMatch(befImg,aftImg)
 
 
 
-Map.setCenter(-79.04879, 35.90418, 15); 
+Map.setCenter(-77.218066, 38.83427, 15); 
 Map.addLayer(aftImg, trueColorVis, yearAfter);
 Map.addLayer(befImg, trueColorVis, yearBefore);
 Map.addLayer(result, trueColorVis, 'Histogram Matched' + yearBefore);

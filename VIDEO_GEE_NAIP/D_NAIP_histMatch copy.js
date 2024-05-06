@@ -1,7 +1,7 @@
 // You need to create a geometry, otherwise this will not work. 
 
-var yearBefore = '2012'
-var yearAfter = '2020'
+var yearBefore = '2004'
+var yearAfter = '2018'
 
 // var dataset = ee.ImageCollection('USDA/NAIP/DOQQ')
 //                   .filter(ee.Filter.date('2017-01-01', '2018-12-31'));
@@ -80,7 +80,7 @@ var result = histogramMatch(befImg,aftImg)
 
 
 
-Map.setCenter(-79.04879, 35.90418, 15); 
+Map.setCenter(-77.218066, 38.83427, 15); 
 Map.addLayer(aftImg, trueColorVis, yearAfter);
 Map.addLayer(befImg, trueColorVis, yearBefore);
 Map.addLayer(result, trueColorVis, 'Histogram Matched' + yearBefore);

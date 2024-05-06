@@ -27,6 +27,6 @@ var trueColorVis = {
   max: 255,
 };
 
-Map.setCenter(-79.04879, 35.90418, 15); 
+Map.setCenter(-77.218066, 38.83427, 16); 
 Map.addLayer(aftImg, trueColorVis, yearAfter);
 Map.addLayer(befImg, trueColorVis, yearBefore);

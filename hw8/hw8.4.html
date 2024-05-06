@@ -1,0 +1,46 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page1</title>
+    <style>
+        .selected {
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Carrboro Over The Years</h1>
+    
+    <!-- Buttons to select images -->
+    <button onclick="showImage(this, 'an2004.png')">First Image (2012)</button>
+    <button onclick="showImage(this, 'an2012.png')">Second Image (2020)</button>
+    <button onclick="showImage(this, 'an2018.png')">Third Image (2022)</button>
+
+    <!-- Image container -->
+    <div id="image_container">
+        <img id="displayed_image" src="an2004.png" alt="First Image">
+    </div>
+
+    <script>
+        function showImage(button, imageSrc) {
+            // Remove 'selected' class from all buttons
+            var buttons = document.getElementsByTagName('button');
+            for (var i = 0; i < buttons.length; i++) {
+                buttons[i].classList.remove('selected');
+            }
+
+            // Add 'selected' class to the clicked button
+            button.classList.add('selected');
+
+            // Find the image element and set its source attribute
+            var imageElement = document.getElementById('displayed_image');
+            imageElement.src = imageSrc;
+        }
+    </script>
+</body>
+</html>

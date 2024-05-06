@@ -24,12 +24,11 @@
     </style>
     
 <body>
-</br>
+<h2> Boston Flooding Projections</h2>
 
 <h3 id="theYearH3elementID">Boston Flood</h3>
-<input id="myRange" type="range" name="Year value="0" min="0" max="2" oninput="moveSlider(this.value)">
-<br>
-Boston Flooding Projections
+<input id="myRange" type="range" name="Year" value="0" min="0" max="2" oninput="moveSlider(this.value)">
+
     <div id="map"></div>
 
 <script>
@@ -55,7 +54,7 @@ Boston Flooding Projections
     floods = L.geoJSON(Year, { style: myStyle }).addTo(map); // Create a new GeoJSON layer
     document.getElementById('theYearH3elementID').innerHTML = order[value]; // Update the text above the slider
 }
-
+moveSlider(0)
 
 </script>
 </body>

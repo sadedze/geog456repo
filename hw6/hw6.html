@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Road Closure Table</title>
+    <script src="../finalproj/closures.js"></script>
+</head>
+<style>
+    table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+</style>
+<body>
+    <h1>NC Road Closures</h1>
+    <table id="closureTable">
+        <tr>
+            <th>Incident ID</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Reason</th>
+        </tr>
+    </table>
+    <script>
+        var x = document.getElementById('closureTable');
+        closures.forEach(function(closure) {
+            var myNewRow = document.createElement('tr');
+            var myNewCell1 = document.createElement('td');
+            var myNewCell2 = document.createElement('td');
+            var myNewCell3 = document.createElement('td');
+            var myNewCell4 = document.createElement('td');
+
+            myNewCell1.innerText = closure.IncidentID;
+            myNewCell2.innerText = closure.start;
+            myNewCell3.innerText = closure.end;
+            myNewCell4.innerText = closure.Reason;
+
+            myNewRow.appendChild(myNewCell1);
+            myNewRow.appendChild(myNewCell2);
+            myNewRow.appendChild(myNewCell3);
+            myNewRow.appendChild(myNewCell4);
+            x.appendChild(myNewRow);
+        });
+    </script>
+</body>
+</html>
